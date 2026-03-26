@@ -1,125 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Satured Hub</title>
-    <style>
-        body { 
-            margin: 0; 
-            background: #000; 
-            color: white; 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            flex-direction: column; 
-        } 
-        #loading { 
-            font-size: 16px; 
-            color: #888; 
-        } 
-        #app { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-        } 
-        input { 
-            width: 420px; 
-            padding: 12px; 
-            text-align: center; 
-            font-size: 15px; 
-            border: none; 
-            margin-bottom: 15px; 
-            background: #111; 
-            color: #fff; 
-        } 
-        button { 
-            padding: 10px 30px; 
-            font-size: 15px; 
-            cursor: pointer; 
-            background: #fff; 
-            border: none; 
-            color: #000; 
-            font-weight: bold; 
-        } 
-        button:hover { 
-            background: #ddd; 
-        } 
-        #timer { 
-            margin-top: 12px; 
-            font-size: 13px; 
-            color: #777; 
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Satured Hub</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+  #loading { font-size: 16px; color: #888; }
+  #app {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  input {
+    width: 420px;
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+    border: none;
+    margin-bottom: 15px;
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #333;
+  }
+  button {
+    padding: 10px 30px;
+    font-size: 15px;
+    cursor: pointer;
+    background: #fff;
+    color: #000;
+    border: none;
+  }
+  button:hover { background: #ddd; }
+  #timer { margin-top: 12px; font-size: 13px; color: #777; }
+  #status { margin-bottom: 10px; font-size: 12px; color: #555; }
+</style>
 </head>
 <body>
 
-    <div id="loading">Initializing...</div>
+<div id="loading">Initializing...</div>
+<div id="app">
+  <div id="status"></div>
+  <input id="keyField" readonly />
+  <button onclick="copyKey()">Copy</button>
+  <div id="timer"></div>
+</div>
 
-    <div id="app">
-        <h2 style="margin-bottom:20px; font-size:22px;">Satured Hub Key</h2>
-        <input id="keyField" type="text" readonly placeholder="Tu clave aparecerá aquí">
-        <button onclick="copyKey()">copy key</button>
-        <div id="timer"></div>
-    </div>
+<script>
+// ================= TODAS LAS KEYS =================
+const KEYS = `Satured-key-SuRP5ASSRec9hvCd
+Satured-key-V02kpm9yBzBQZATT
+Satured-key-m3G4N42Mno47hJ0c
+Satured-key-DZdYEsxz8XZxYKqG
+Satured-key-RvO3FdNSUPGrz2h2
+Satured-key-qhdCYufSPZYS3BKg
+Satured-key-KoK6z5HwPwJfC8Sb
+Satured-key-p06ZUwajjLPLOSHh
+Satured-key-xIOhuQDgaFxEzfoA
+Satured-key-7VK0Kgv3N77axiVW
+Satured-key-cXWtukRaN6dT9bqM
+Satured-key-YPuldAZhcDsEIt5u
+Satured-key-NWpf3VRhVPojgxpM
+Satured-key-6ck4OEZZOaM6gtI7
+Satured-key-YIz9XGktzg5EEkhJ
+Satured-key-fKWPfaflmRlsn5T4
+Satured-key-1zOU22NkkMzARLZT
+Satured-key-DzMv5sev0KRiiLKf
+Satured-key-8OPlkGKOjInPk8s8
+Satured-key-q6n2AZMqIYaJyufo`.trim().split('\n').map(k => k.trim()).filter(k => k);
 
-    <script>
-        // ================= TODAS LAS KEYS ================= 
-        const KEYS = `Satured-key-SuRP5ASSRec9hvCd Satured-key-V02kpm9yBzBQZATT Satured-key-m3G4N42Mno47hJ0c Satured-key-DZdYEsxz8XZxYKqG Satured-key-RvO3FdNSUPGrz2h2 Satured-key-qhdCYufSPZYS3BKg Satured-key-KoK6z5HwPwJfC8Sb Satured-key-p06ZUwajjLPLOSHh Satured-key-xIOhuQDgaFxEzfoA Satured-key-7VK0Kgv3N77axiVW Satured-key-cXWtukRaN6dT9bqM Satured-key-YPuldAZhcDsEIt5u Satured-key-NWpf3VRhVPojgxpM Satured-key-6ck4OEZZOaM6gtI7 Satured-key-YIz9XGktzg5EEkhJ Satured-key-fKWPfaflmRlsn5T4 Satured-key-1zOU22NkkMzARLZT Satured-key-DzMv5sev0KRiiLKf Satured-key-8OPlkGKOjInPk8s8 Satured-key-q6n2AZMqIYaJyufo Satured-key-gbpOCVSZh82QixXT Satured-key-WfJhvHg8OqHYvpXv Satured-key-2oBDFqRf4GmEsRYi Satured-key-SCPSdQer1X996FRy Satured-key-x44NP8NQCX6Lj8Hv Satured-key-8vaE3pKKAcBfZdmD Satured-key-GzPrNmUuwNAkAuwm Satured-key-4iZOAPc0eCZ2Xn5s Satured-key-ZwdH8zqnyav4u7Kg Satured-key-k4ywhmtcy4MCNCye Satured-key-PLHY4MIsM6ELZtYW Satured-key-nwOw8xBDucYcR20A Satured-key-dKCLSR4reyzQDq5J Satured-key-qYYBHPEuFmx7RMHo Satured-key-9h5liLucolq0ha6S Satured-key-dj2FnMsGpPhQAhYF Satured-key-xbPbD7aKsAbjS2gB Satured-key-Qxmv4EdqICCUF0ll Satured-key-H6WyBy8xKaztG4ss Satured-key-PEHTS4GGFdwMu61C Satured-key-u2LOgYm4DVMEsxFY Satured-key-WCoamor6ktuTmibv Satured-key-mT8iqbUnPACP3ban Satured-key-FdohoVpJKkS0xq6b Satured-key-BIN5GIqeoe7UvICA Satured-key-cSr79xCZvDw7lY0S Satured-key-yUSeJk5JiccrbR29 Satured-key-UYrMYBa6rbDW77yi Satured-key-CRYf6DAjxr9XL2zL Satured-key-P5Gd7alp4VVFLPvP Satured-key-uaEOiYSN5JFpEvtM Satured-key-4JlGzcnWnjWNy5yV Satured-key-UOJ8KpsXneAKaUkH Satured-key-u7OpQOlinHosmNou Satured-key-xoqCICcGf43eln9c Satured-key-zPko1iDUgjf6bz4J Satured-key-UAA8sPBFzeUAWE3d Satured-key-T7rOj3SBmoqsZfs3 Satured-key-xmPtAZdvRSoEByae Satured-key-aIJn57EXiRr7eMDC Satured-key-d0ZJihdojCSnRQPZ Satured-key-fUzuf3d1JmzpL83P Satured-key-haM80lLHnPJ56eJr Satured-key-9rGFKASiVH7xXXoJ Satured-key-Hb3jXYk5oe8KQM8L Satured-key-PuCgBsnfSrZgi5Px Satured-key-MkVtdwYB6gKEBHzJ Satured-key-tiHJyyBRZbasMgRr Satured-key-VFKrrpsBXVFFlpam Satured-key-pIKHirN3Osd2R6PL Satured-key-niDCaiNjcJZ8KlA4 Satured-key-ORFUcz65pLo3HnrI Satured-key-6NNbxtgXHu97kQKq Satured-key-0XGaYSYa6XrsSNEl Satured-key-JytmnVBV8F8wW2BC Satured-key-KwB53AwGjgEJ7YXY Satured-key-GdLpTFSQVxWL5Md8 Satured-key-PFwFzst4qicmLL9r Satured-key-ZagH8oDnZv1Cb8TG Satured-key-oenZBmiScJK85uU4 Satured-key-JfHfRjuwHRNvF4SL Satured-key-y1dYJEW9KFsGI7yJ Satured-key-pOPsLAIb774tVWKW Satured-key-VGrB8iTR8U9augVD Satured-key-4qvSlpnTb5KjJM0M Satured-key-iRReiu7PvcOVHcYM Satured-key-sPNxvrNbh5RocK61 Satured-key-38ZwVOFBVWvHv9Za Satured-key-aHUm9I2Tj5SgycLZ Satured-key-2ERgw9Ra4YhWow2y Satured-key-RdrXEAjf3SXtiCtR Satured-key-zXtnHeeQjgyU5bBM Satured-key-qkoSojdRoanQfSxR Satured-key-fS2zHFh7BQvVJcHF Satured-key-riLT2lXNmjqQOPFc Satured-key-DhwJBqtJD4i7qK3L Satured-key-kWnbmK805jYai2K9 Satured-key-iEqyFLyrsVFZ77e5 Satured-key-MaZuivmUzwIvWX47 Satured-key-aAQB0jHrUO2ChlmS Satured-key-eRdaRlcxa5K572KO Satured-key-eYR3oyIQuwWHADPD Satured-key-KWQ2p9MFrru8Yp0N Satured-key-h1hTbPZo7jnxz3kh Satured-key-0j78kYnC3jnuyXdR Satured-key-k82rpEcQQ3yOJfkZ Satured-key-KWbsVZMJdFuYRKkx Satured-key-mieS5ND4Uu1oPJcZ Satured-key-F901mCLIO1w4Xhr0 Satured-key-Lml2BBIFb85qsyOH Satured-key-ggdWue7TZepProMd Satured-key-KCFMkioNlikdIODS Satured-key-J8zdL2mmG2acB026 Satured-key-VpSWzHOT5H9OSfAP Satured-key-t24KCdfFtyaHHoch Satured-key-oKPLv88QuEfv5ACe Satured-key-Ts61YLNMIQRJpJeB Satured-key-U0m27jsEdAnZMEQx Satured-key-oFMZzZskOtWrJy7T Satured-key-6GV0quUeDNrOTfpr Satured-key-2BtmfXUTml7OftUx Satured-key-mlSQhvZcNGhtiP1B Satured-key-vje4YLPzWpjMpLXy Satured-key-U33HM9vOjq66tsnv Satured-key-bSbjon60qNNAKXqB Satured-key-g7uzFazX3521Qo8C Satured-key-MdJR1Pi9dVS4txBt Satured-key-ZvaIfdMxAceBUsdB Satured-key-Hr5vRuej3b1KYSAC Satured-key-gAvMHbUHDc0CqMhR Satured-key-Xfag9wsHKhiOazaP Satured-key-Zw2RF2beD3LHN8Nz Satured-key-qBI7LKiiG19HBIxe Satured-key-z2iAsvmwCy1OqFjI Satured-key-lSvejduOs5jQT17y Satured-key-vkkby22DjynysgNd Satured-key-n8LGgSUEdRFgWZam Satured-key-leTghYhETUGBXgtk Satured-key-krJyZsbclOvpSQ8w Satured-key-Az2nepJbqN4YjRDG Satured-key-LUUliSO1YixCkOVD Satured-key-YqP7m4hEhcbxyT3x Satured-key-kG5bVn2t3RWibOud Satured-key-SRUHQUxwA8QBe414 Satured-key-YgWQI2yHYH3fyzI5 Satured-key-S8b2M41V72yNtlLP Satured-key-AU7CqgdTxSIAjXSZ Satured-key-JQ1RAD6BxTF6hwo8 Satured-key-eayALayQD1oqXx3Z Satured-key-s83pq0aWCbIlZnAQ Satured-key-UCkxpGR7pfLczxVw Satured-key-jptPH7ZxmEPqmres Satured-key-CyYZrUb7ZXxvGGq7 Satured-key-GNDJT3IEyftAZtUD Satured-key-2w2P9I5vNJwiYq0Y Satured-key-QadPd9SIgeoG86ZR Satured-key-DYCStq3FkYPDEcNL Satured-key-4KdwdD8FudqYGMsz Satured-key-il5Dr6xmiNfzC0hp Satured-key-FC6uEbsrOZ05hpnm Satured-key-xQ8pB4yRLUfM2fTl Satured-key-BRNQbZ5sw8Pj4MTr Satured-key-AQuoFrgSj33ph41p Satured-key-XxeZgZzmhol3owYF Satured-key-VSOFu8FwmjlS4i6v Satured-key-c7c2nZDyJ4tjwBE3 Satured-key-rvCd1lph7ZwtsGbq Satured-key-7RovAFqvWQ81E4oD Satured-key-7OdyIbNv8NyiPk3Y Satured-key-cZ7TxUVENTz7u03i Satured-key-o7S3HyiKfrAXhueo Satured-key-3y5XeSc9diygWh4K Satured-key-00fR0QZ2R5TTfTNF Satured-key-CjNyqx6A75ZUmWTr Satured-key-VJWviELhKI8V8x3C Satured-key-FG6reHAfFysixwbn Satured-key-9s8QGCaqrCf0oayU Satured-key-Ic0mrT9ewilScXvF Satured-key-9cGNmdGglZN3z8gO Satured-key-6Wkmw7Qvx8x8mjA5 Satured-key-W3wWivKEHhvmtXZa Satured-key-wzn30b8S9GXLlxCo Satured-key-t1UjipNPnI0W6j2u Satured-key-P7llU9Wp5JI3csCS Satured-key-VS72QRSrd7UsEl92 Satured-key-E5DfDtDymlgpr4IN Satured-key-qGXZXDmX7k8nhrQl Satured-key-pzLhr58ctXfOrrdt Satured-key-MSN677oM8S7QZiC0 Satured-key-XYMuLTAPfg7tyvKk Satured-key-6lyqKkb0St2aZW8o Satured-key-RRIWNMBvzvpOJlUt Satured-key-znnkfkzXS2IVZvzI Satured-key-B8SCPfLV3OiKkCu0 Satured-key-zwngPUzAAqxyw1Aw Satured-key-gXitdAWT0nHTlfrG Satured-key-DsVRgpgRdJQdrNi1 Satured-key-NrdZJoVM9RQlYPOA Satured-key-q7qSbdoP5Hb39iOH Satured-key-L2lwTD9O63jt4e4t Satured-key-1GUDMUkXSTcZeWj5 Satured-key-7HxwEXbLAEeyz8f3 Satured-key-OV3kwCql7lEjmBvK Satured-key-o8c27qmzQViy99ah Satured-key-pG9W44GQ4IlE2YoY Satured-key-RuPL1mTGaGnDCdhm Satured-key-Oyb8atpO6BKvznkP Satured-key-lxxIj58e2u2UPG4Y Satured-key-X2T3ldUEUwBacEqK Satured-key-Cy5wnmlkkq90eKDV Satured-key-ohhWp3T9mTn1WwHs Satured-key-FaO2ctA8p39lMHYA Satured-key-hMfLa3DnzeF7A1cM Satured-key-Qvh7Z8f6KN4GTBrs Satured-key-pRrwiS6St65tUOTt Satured-key-kmFIryr4zIylk6a4 Satured-key-OPsONtCsY5hNa9tc Satured-key-KItg6bpbd2r0yz3L Satured-key-v6FUP9CXtA7S3Xkw Satured-key-8bpzhnpEurePRo1N Satured-key-KKm4djN5hVUsexEn Satured-key-1X0MXRcz2kFSgY4z Satured-key-gOa4g10qy4YmSqlu Satured-key-Kxs9aUbMg4Y656oU Satured-key-FQxEbR8eYolU62Jp Satured-key-IFbitaZG2uaLmtEF Satured-key-HYUs2UTNUQujfAsF Satured-key-Zs1YP8B9t5uytOYt Satured-key-IcDPoqq5kWO82tmM Satured-key-DvFoE8H03pqr6djz Satured-key-JDvbC181oE5vMo5x Satured-key-ltOUQST5NlHO2VAu Satured-key-bLJ2aVnIkTV2lJ54 Satured-key-Mo2hQ55vOWTaHWuw Satured-key-OwEAVpOmYCg3fQyQ Satured-key-ON50bcaYFM3DJVTQ Satured-key-tzB3UaWjyYTOKEwc Satured-key-x9bG9Mq57wUHNK0t Satured-key-wY3cjlug779MytcG Satured-key-umeAxM2y03h6Ycq4 Satured-key-PqHz0gIixSOIYGbl Satured-key-4fSgElgoZltB8H1f Satured-key-WeiJKGdvgM6M2Mz7 Satured-key-GjFw2WjZAoLsBzTG Satured-key-N4X7TaRLvnU8Spvt Satured-key-v1CqbSbeJddaRjm1 Satured-key-lsijT8IaDRmc5dTC Satured-key-8IZsYSGRCJjiN25y Satured-key-SFeqg8xiuPf7Dynh Satured-key-fkeaCku2X4gI77de Satured-key-y4Vx1WH8GCZgRxX1 Satured-key-7ob4BXFGOTj2zr4R Satured-key-n6lzHk2HVS6lC3L6 Satured-key-q85cibkpRsOg9gwp Satured-key-UDkF3b38xjx24Xra Satured-key-GRkz3GUVKeGupntD Satured-key-QxqjedPGmFywV1ME Satured-key-WWqxhloitPjsdZNn Satured-key-YR2LJDFHWMQA7zwP Satured-key-gqM2YH0b1Ej8ISOl Satured-key-QEuyvFUrqSogo23d Satured-key-XnuL3HArhUKFiGsD Satured-key-3CT6Nsaku59Vohe6 Satured-key-crCGb44ZHtGIRrH3 Satured-key-x20M429PRVBl2ubi Satured-key-c9Jltb2OlWrmgSlG Satured-key-W8aWBz2KzioQi9wm Satured-key-CkudY6PLpaYeH7im Satured-key-hZQv6DKmF5oU4IAO Satured-key-aQExdnmInjkXkSmg Satured-key-h0n3oj8omZQ8q3ag Satured-key-uIBCYDmpwXs4TaTv Satured-key-tPkAIMhTwFo6wE3I Satured-key-Jnw39eZ9X3VU9bC4 Satured-key-D5MCW98QuxKxEsG2 Satured-key-Xd1ls4EzQw58ZwPf Satured-key-Zpubzst41jgpPIvV Satured-key-01LeUFkNePKYSpMu Satured-key-uVqRindHrduuK7BF Satured-key-CpH6T18SCt1lhOqR Satured-key-UeSNh5eLvJRjAafQ Satured-key-MVfQDk96QztNZSb8 Satured-key-W2UJNJVbsDQGeSj8 Satured-key-R0daPVhXz3E91y0K Satured-key-t8e3bCzeTeyPHwC9 Satured-key-5RaTbUMOOpJEihOr Satured-key-vUqPWcn3lRpqwyMv Satured-key-3KVUH9nMrZPooTqk Satured-key-J3hE0JE4jjPvbvvf Satured-key-dZWP4jKdXERW1GKe Satured-key-9Ff3DYzRROm884SU Satured-key-H4JURfCXGHrk6xQL Satured-key-gyqUD7EoUUQ8pPs3 Satured-key-LsLAqaf1nE5C3nSY Satured-key-90DIgo5rgZZ1WQmk Satured-key-URjtb7w16zMaUA8c Satured-key-xIkvEKrnL013gJ6B Satured-key-wzdlaxPyC9xJ1z4j Satured-key-9YiScHhex71M5FoA Satured-key-oGt3m0oksfOTQ5hz Satured-key-TVoE0EsNyz2U7pcZ Satured-key-i48S0Dw1TrOwSz4x Satured-key-HIOh00bHpvWKZYfp Satured-key-L56epdBFZL6CvYMM Satured-key-9mDU5bvFufhOa0nJ Satured-key-VkzlmvwQiCfO4AC0 Satured-key-HOrCH6emWOF9lW4H Satured-key-u7ajMAo2d9tpIzUE Satured-key-AgpuQGDnECwLVMA6 Satured-key-pi8Qt1jOyfNxSD6A Satured-key-EyKvC5lax7gsnfdF Satured-key-VQH8wUorRSpUpLg3 Satured-key-eTlk15yvAQhIGY03 Satured-key-byxKSah25GaD5Nhg Satured-key-qeH4YWczfW8zzqKB Satured-key-xGWOdiKfYAX0lS2U Satured-key-yJKKDGvy1LHZcKEv Satured-key-XOCGkNnVdPq6hoXX Satured-key-mtkuMeXvwOxsQrEN Satured-key-vzGrmX4y71Bunpvb Satured-key-N7VbmQuc747KywSM Satured-key-jQTFyau5BYThkpKF Satured-key-zIB3a5EgbXDkdaRs Satured-key-Vt4j8h2cTjtEV4QF Satured-key-5ktvCi52WGTxU5DU Satured-key-PU802ihKhQXjl5O5 Satured-key-V0IvMut1JCIkx7vh Satured-key-pNFUMm8tx5tRndKT Satured-key-vqAapSQcs0lsPhGu Satured-key-YMngEw8fJQBBxl7w Satured-key-AkgSxXVjF6DVXR8Z Satured-key-XKSLCYgCHMLcdsyW Satured-key-qfLJlmGniIJWkQyF Satured-key-9mgTZiVWKq8Xh3bx Satured-key-LR6yuJwkfNgVjajz Satured-key-vHLVm6a1ND4XdKKQ Satured-key-0CdrjQxGRCxgMNF9 Satured-key-ZVqYt8citQWJ28vA Satured-key-RAcMC40iG65F2i7G Satured-key-vqJRgDzpYrxR9CO3 Satured-key-JkPiLDMvLIsFLKbt Satured-key-G72lPwEbJ1sbLDdp Satured-key-yJ4UIR814UWEmm2p Satured-key-DLcaQcdM5GFDHs2C Satured-key-1vxOBkutM0aEiSW4 Satured-key-C3uLKllXhtPIDBfP Satured-key-UsMiN0aCFJBVZUp9 Satured-key-B8h8cz0KttE0UTNQ Satured-key-hwqEgAGQNynLTWzt Satured-key-OiqCIRJZ45flPqsl Satured-key-OqSUBkQOM7twU021 Satured-key-DwAIJHTNqW1FksSn Satured-key-g3a3G6WVsihvIBcn Satured-key-4i3qUrrZUNGuEcVx Satured-key-P6DpsV1CSjK6EKNo Satured-key-gN3QXlGELzhoF4mZ Satured-key-CFCuJeVF6IdxRjLJ Satured-key-MYI2ORqSGkZY7txP Satured-key-PX6oLdo7eQmU8MP7 Satured-key-XQav8VU1go14vNfN Satured-key-OtPN2ki5nZDzWz64 Satured-key-Jb3JSAwfURD8c7Yf Satured-key-uaNJ7OSbApvue5oA Satured-key-SfJZJcBMVmme5Yiz Satured-key-gthFjt2DFIUI8GkL Satured-key-cC8YTEReawefr5Ur Satured-key-yzSJFZaSg1v2AZ3v Satured-key-LTLJbd0pYnTF6ab5 Satured-key-1GKOB5jZsMzJrozy Satured-key-T3hVMnF7FK40TZ2d Satured-key-DNANp18SFiead9yY Satured-key-x6PtTE5aakcYXocU Satured-key-APmtiF3lSFx1YCWZ Satured-key-eCGLIKcSJXQ0HgDv Satured-key-AlPeINPE09y9VDxZ Satured-key-xuyT9W1Ha88T6ReI Satured-key-AnjtQK8UzeoJ6z7k Satured-key-mW728Gm18vxQ7cdN Satured-key-o8ZglHHEdIZ16O7X Satured-key-bT4eiwKr6ZZzdI3t Satured-key-rbhLB5TexSmQSv5N Satured-key-oGwhzwBs3dEeb8f7 Satured-key-JfVmCqPwVnVfmIWq Satured-key-lTY2Or6gbJMmHkii Satured-key-fI9plr2g9jO9IFox Satured-key-im4RaxXa90KoIU8W Satured-key-oruMz8QkTaaeSW1t Satured-key-8hjIFmYgz3haYYsp Satured-key-PmgT8SomSIRxjYZD Satured-key-AajaRe2lEIAVGoeW Satured-key-1HHnBnQ3zrsSIxMR Satured-key-kraqux5Dt1ZaND3V Satured-key-iMJzrfvFfuCnx8BS Satured-key-h3A2myAilI6TYIen Satured-key-12u5lFFD8Bwt0Oc9 Satured-key-nzJrnVHkDvVQp8s3 Satured-key-bEU27CQOn7DvCzNV Satured-key-rGAcLQUGPJqhErEm Satured-key-sDwZbunAkucfPPii Satured-key-xmSniyzFduTKa5kU Satured-key-JspwPXzXGF1ENJ0Y Satured-key-YOhdeU8ohuGXeOtt Satured-key-Yv9UTfzfMYTvYYJO Satured-key-2vNALus0EL930Vnu Satured-key-Pdrx36E5YVXFTn8X Satured-key-4qHIt4w6eK3WVpTy Satured-key-tAkHlzR7sn3qTHqi Satured-key-YlJbdzJTGg3QY1Ex Satured-key-Di4eHTXhNTASHhKy Satured-key-X65npUUS0p3IkR5o Satured-key-3tdoWHfTf34vot8N Satured-key-xAaxxnjdcvMFEDDZ Satured-key-De0keq8FbYpeLGdH Satured-key-JSUd9NyX4afqMakr Satured-key-x3vNQpRtTFosGg1v Satured-key-JaeEeHEeKRFX8Qso Satured-key-RnxijAqn9faQHDp9 Satured-key-YaWVr6NjBtBZmXPv Satured-key-D6tILfXrfEKOfLdr Satured-key-mXbeRsjJXYsOGbp4 Satured-key-PWPtYTMgi7GE5k9Q Satured-key-5nTavaYbVhHT0qQh Satured-key-CA9UW6x6ZGvluw9s Satured-key-iU6q9eIoPmEcpKxR Satured-key-6XRALwVAHlpvjx1i Satured-key-TIK4tawmI80fvfJZ Satured-key-uy7Gpxe6mtwRGItu Satured-key-uvyoDz0LdLm1HZNd Satured-key-rgs2CzE2boMMT0Z8 Satured-key-3fTYsYQN26AWrSRi Satured-key-xYA4xtYGVuM5jF4A Satured-key-yAiS9cJpyx278JGm Satured-key-ilACNtUed3lyjLXd Satured-key-NaridzXHkbuuMXN4 Satured-key-RQVy7SKRLCyvp5mx Satured-key-ZqiP0iPd6tzWBGFk Satured-key-4v99NvPwQIN5jOq1 Satured-key-Hzxozx1iaQiIJv6B Satured-key-nUuKRQse1HVoLp5p Satured-key-fc0Tq98ItsEqU6Xt Satured-key-1wCDWjKxznZNk1B9 Satured-key-7PzzUxHAwaiXKLn3 Satured-key-kIbo2uZP1hSay9oW Satured-key-fDA93Y3LnNyFKd6u Satured-key-ngdnvnCqM4eEEygO Satured-key-jbeSgRjdQHnWx9xJ Satured-key-LNk0zyy69qzJChkJ Satured-key-MwnigvC8sVLTXd2H Satured-key-FL4dX3OcfUJz7Czz Satured-key-oT6qUUdYDPFzSeM2 Satured-key-MBx8LxEhWdcKX24F Satured-key-2M5cOaNfnM2iagMH Satured-key-sxjYf0GUkw02Hj0h Satured-key-Zzhtyh9tBNFCZ6GZ Satured-key-gCq6aYR3cToVSsP0 Satured-key-r40fX81Od6zQCfz2 Satured-key-Tax3orqgM85dd0WR Satured-key-hoXrjeJZeYYXRws9 Satured-key-6WZMA0CO1lFUjzpL Satured-key-kgSXhWLhXHeWwMA2 Satured-key-nXc8ZRnQS5CiBFlU Satured-key-eXIswpyVsEjDrx8l Satured-key-x7fCUGnmFscNhz5j Satured-key-E7I9gBCLp9MxD91v Satured-key-ZW5VIdPNH3T57ipK Satured-key-DxFld0a8IQz526t1 Satured-key-NkUlPkILWAX7cuTT Satured-key-vyt1vUUGjkG6xE3j Satured-key-8QKRe9AMXKxbbPkX Satured-key-XyXAVAipeENt3dp6 Satured-key-ytJMmmunByyQsoik Satured-key-kUPeexNqZEX2PgH0 Satured-key-EyrBWYOykdTmDtn1 Satured-key-emSOt5sx8VVBhtlf Satured-key-CZye3QbJHNgtayBp Satured-key-39YjTIxGvttD3122 Satured-key-DcF88x9aDovEE8Gt Satured-key-DcoY9paKRfjmynUP Satured-key-GYw2aCRQS70qSOsy Satured-key-72fDprLZ8i2Cu2L6 Satured-key-XuVbjytK8Gn0lIhl Satured-key-kQiyhDIZ17hPxdHW Satured-key-HWSBlhZxnlmzWkSz Satured-key-4JgdJ9JG628MLObm Satured-key-pX8V7hAXel0wfBz2 Satured-key-c72xgNZrtyOfIehM Satured-key-2ZOn89bazVXXvh1W Satured-key-On1HaeIQXhEfSbU2 Satured-key-PKbPsrrf3rjBXXzw Satured-key-1bots0L7rPNLc1Dq Satured-key-Y6TZ8VP0KkrYEyc5 Satured-key-Osza7MkNsAZraESA Satured-key-o6THwYgIjl29nllW Satured-key-ahZ9JseCPG5okHzU Satured-key-85G3eDmmxIq1xCPt Satured-key-x90B18u0maPPBfA7 Satured-key-0oJIx3Wq0ISLwqAk Satured-key-uKtkTNxhkF7kAHQc Satured-key-xbwzLRBt2jz7aH11 Satured-key-E5BayqsEk5T6b0HU Satured-key-mZFsoFm8dDFxKngz Satured-key-2tMxYOUPAjKs9WMg Satured-key-BUqTyghOYPIosbd9 Satured-key-Br3itpF4xuFR9lsZ Satured-key-vhcfsSjDBIENQ3vy Satured-key-oJdyiJgU9ZOk3N7e Satured-key-Gr8hdei4N9igGvyG Satured-key-APVKG8Im1D48UP4Y Satured-key-CirtMZeIteAGP2e8 Satured-key-jGDgQBKqzvd9WOHp Satured-key-TBM2uXL1mkSP8jHT Satured-key-eMPU3OHSMsYHB6vk Satured-key-TFi3hpzWGVZHmNhg Satured-key-fQRjqwvDjmLDKZcS Satured-key-8aHFfA9Mdd8RUVHM Satured-key-8ZK8oCzV9XMup26p Satured-key-RgElIUpeUhxxKPq0 Satured-key-Z5YVKyREOCq66Ynw Satured-key-QzhfiEqAVipXcPzG Satured-key-BpGVCzCg9mS1x5uh Satured-key-NDqmxtYrXkcrmujx Satured-key-Xwip5jdM8ZGXtfn5 Satured-key-pKR696jVGBUjVKEk Satured-key-8g9yQRVHk5T8Syg2 Satured-key-S1XKToUTqU4DUvlL Satured-key-xNd5GqYTrAjIlXNc Satured-key-A2bq0PQ1NYVh6nwq Satured-key-8WWdimVYOXIOVEll Satured-key-uoPOeXFxWKsLAuWZ Satured-key-gavs7TbAOzgNaPaW Satured-key-8t7Zf20wBXO7ogSm Satured-key-jTcCxwiAVjT8AhAi Satured-key-VhDtyTHCdKw2f5vO Satured-key-i7e4S1yUImaZS0YX Satured-key-h9tlhSKhVhVH0CCR Satured-key-vxdJ64BTsZEiC7dz Satured-key-ObxQQTl5qPmL5Nwa Satured-key-vw6Kk0V1m0coi0yS Satured-key-iReW9iTiFm7HioL2 Satured-key-AOYReG81s8s1P7ZB Satured-key-s2iEGXiRMvusn7aN Satured-key-y6AjZdZPxGAQdnvC Satured-key-Jb86I5a68uTynThH Satured-key-CgcCP64cXFScCcRa Satured-key-RASHUh3raSwyG0iE Satured-key-7FuexUsgNcKhh4xM Satured-key-OFdN9wONJkKmRiyO Satured-key-9rSbjR9gnidBOaHb Satured-key-G3Ml7WSX6NUh06L0 Satured-key-I26kYtEuOMFSO5PY Satured-key-sj2YwvA48OmYIAqm Satured-key-Lsn0Z3mRIieqdN55 Satured-key-ZIlBkpSx5bgZ4bgv Satured-key-jvk3gowQgaWz9KGC Satured-key-WAiO6JZD7Xpy0MBq Satured-key-qqiDjEzMs4srOjyK Satured-key-I0mvXZ0oaGjGtyV8 Satured-key-fbAXvuZb0RYAfIlI Satured-key-jbGfH2is8f0dr4Yx Satured-key-7L8WhShOUDsmu0Sx Satured-key-Zkj7otdfbUREuU2q Satured-key-iBEWxoczkzojbfr2 Satured-key-I4zJ6j2b6OI5kupg Satured-key-1Uz0MiuQ0UdvaeAY Satured-key-74M68EjVp5uC9YGX Satured-key-IzFu8M87AqBhJy2Q Satured-key-jdN2fCOq8E8qgkaH Satured-key-T9IyE6lYQORDtaDk Satured-key-pZO8ZdqpYHNUIz7i Satured-key-2h1uV5VlDSpu4wo8 Satured-key-TUshmzuZPyrudPCl Satured-key-hDJeZI166Uz2RcYq Satured-key-VZVIjsqXW48Rxeot Satured-key-fNYpiMDiKTMkMEtd Satured-key-y6NhtOVA3peNDHTV Satured-key-nR7F9XXR0Tj7m8ys Satured-key-OJaEVGONRyTN8odk Satured-key-lSStH0w8cEGYzToi Satured-key-7WWQWF82kdQMYQIh Satured-key-aAQAemEgxKUEJApS Satured-key-RUBQhap6p49WxDAl Satured-key-IBy88YkakKloFDnq Satured-key-ByQNcgN4MPSHZzyc Satured-key-2xtKY4oAVAc368fT Satured-key-MjUBul2mmNCgGnFi Satured-key-ATC7vRSIKDK5goAl Satured-key-gY18Fin0qaeBUmCP Satured-key-ZgGOkUkvAkhacKUy Satured-key-ucCfvRnBkXnoc5Za Satured-key-8pVDvwfODqLFliuM Satured-key-kmWKph2m6VZ2zjVm Satured-key-se1XIea3PwX8OpN5 Satured-key-MHS15orppGhdep1A Satured-key-T9MRddTC3l0zf9ji Satured-key-Cp9rtGMxKgkaf5mu Satured-key-rcyjiLDrBLOn9mm2 Satured-key-mZekRlQW9RfJh1BB Satured-key-lsXWmNCrqKiMOVWp Satured-key-etOZxiSe0fxdyLmE Satured-key-hzeyOwD2xN4YxYsQ Satured-key-7F791Qa8xJkP9BIe Satured-key-bdZNcg5ROP87Pt2e Satured-key-PYN7EmYovY7HF3Wi Satured-key-ddlubKRoHDD2lGtJ Satured-key-GOPtAKOqw7m7M6hX Satured-key-sgBhm3SWXp3t1EyX Satured-key-puJFFaixv3XyIeVA Satured-key-a9SOKpaDPgxWRgeE Satured-key-prbxARrrTqVoCjAW Satured-key-r4daDijMUTEZf3gN Satured-key-oEcwYnW2ymUl9qS4 Satured-key-7wd6zRAvEnlpzCQy Satured-key-WPzDjJVZKHN6DBno Satured-key-zkTIhgTrHRZXDFOm Satured-key-7cuBGmKIPwnhmwO9 Satured-key-bjxoZLbI2usFca0X Satured-key-yxJcBTnFV1zJwoDL Satured-key-tNUaboIDy84mrY1c Satured-key-rLpnpcsaYcu90kYi Satured-key-3PKM00y66D3iol3E Satured-key-tLx3LSFEvRHtM0HZ Satured-key-WvFm2O96Ox0iZyVV Satured-key-jBVmO4hkb4DVngyN Satured-key-MXBlTYyb3ML0yJPZ Satured-key-jT0sO33cNcClrIoR Satured-key-JNZkXCtFKf5LU1Zx Satured-key-yW0JAkHg4Zhqdh8X Satured-key-jSd2Eh5pOAkiRzEh Satured-key-e5jbhcjDJe9tZtaj Satured-key-LIi4j0GfBGLdGMUh Satured-key-GsFdjVSg2VAsqDs8 Satured-key-ecBisbtXMhwLamgc Satured-key-pIaB01fv57ehVBAl Satured-key-MWBcScXZoIQ2n89n Satured-key-vcEan57ljyQaVvYh Satured-key-rr1oP5QqV7XF0td4 Satured-key-bJadBRmhajbwzXzP Satured-key-B63WaEshkWNVwniQ Satured-key-Q6ASxowEstFAF9uy Satured-key-NynxsHW2Aamu0X6b Satured-key-Av7vqgtBtToJY11d Satured-key-qYtEDSmHM27Q7Fq2 Satured-key-IVLvpbKBIXbwPzJ1 Satured-key-GXVV4FkQz18LdrEX Satured-key-1nmE9HRYllEgw1hI Satured-key-TXqYDkYE40pqZrA5 Satured-key-SsyaRWwEmCRR2p5p Satured-key-r16sTJTFSh2KJkTB Satured-key-QFxVtB1yxIhGUVu8 Satured-key-EPWetv0eJvEKQyf1 Satured-key-8li9TQunoxebFwwd Satured-key-8j8OtTkoXdLMv2r6 Satured-key-TaNwWsZYLPFsA08h Satured-key-FB5NiJkZuItVaRoV Satured-key-Kf9HNrZ2l9ax08IU Satured-key-TkT0G61wYwWPdCkk Satured-key-o9sfNnZq3oCEW7Pj Satured-key-UEsqewm1krlYk0OO Satured-key-wpnz48VqhJNHZT7V Satured-key-DKTbh4Vvw0IZudDU Satured-key-FAsLIb23lbt0KE9E Satured-key-GBj4Lekpgx3NcSXG Satured-key-nd3dez0nzZad2ndO Satured-key-bdZeNZT0OIyxBdGw Satured-key-ocb5OvlCSBbBWuZX Satured-key-0bbEO4lA08fweuw3 Satured-key-5ekf4tLWootuWxip Satured-key-rjL9kVNxiYoeDOF3 Satured-key-s37OoEgoaYcsfTz7 Satured-key-qCoGlEkooDMPrKxy Satured-key-jwd0M5D40rFWxnSp Satured-key-Xsxx5eQ3FHP16jXo Satured-key-RSqcj4RYZOquYfdy Satured-key-1hMbwfbUZoC4ESVK Satured-key-1ajp760mHwl8i4Nx Satured-key-IHe1HFTX31Dn1oGI Satured-key-3vG6ynjTlS7DiE7q Satured-key-4okAb6S9OgWjh9hO Satured-key-Zn8h1BbmgwtoLjW5 Satured-key-smqoF3gxSX4ASgG3 Satured-key-2o3Aqyh38RAqRk4b Satured-key-MrlJKyA1i8Kh7fSm Satured-key-qgApw5A1mVIzDgsD Satured-key-sQp1nwp9Yi4oKVD3 Satured-key-NTgKccOme6E2iS6j Satured-key-UQRtrPdBMGpvPe0o Satured-key-8a5cTmJCoKzE2eu8 Satured-key-jGvQRZyoVGVyYNje Satured-key-S71gxRJyJBgUe7l6 Satured-key-n6UCAQc`;
+const DAY = 24 * 60 * 60 * 1000;
 
-        // Convert string → array limpio 
-        const KEY_LIST = KEYS.trim().split(/\s+/).filter(k => k);
+// ================= PERSISTENT ID =================
+// Usamos una cookie de 1 año para identificar al usuario
+// aunque cambie WiFi, cuenta, etc.
+function getPersistentUserID() {
+  const name = 'satured_uid';
+  const cookies = document.cookie.split(';');
+  for (let c of cookies) {
+    const [k, v] = c.trim().split('=');
+    if (k === name) return v;
+  }
+  // No existe → crear uno nuevo
+  const uid = crypto.randomUUID().replace(/-/g, '');
+  const expires = new Date(Date.now() + 365 * DAY).toUTCString();
+  document.cookie = `${name}=${uid}; expires=${expires}; path=/; SameSite=Lax`;
+  return uid;
+}
 
-        // ================= CONFIG ================= 
-        const DAY = 24 * 60 * 60 * 1000; 
+// ================= STORAGE (persiste entre sesiones) =================
+async function loadUserData(uid) {
+  try {
+    const result = await window.storage.get('user_' + uid);
+    return result ? JSON.parse(result.value) : null;
+  } catch (e) {
+    return null;
+  }
+}
 
-        function generateID() { 
-            return crypto.randomUUID().replace(/-/g, "").slice(0, 16); 
-        } 
+async function saveUserData(uid, data) {
+  try {
+    await window.storage.set('user_' + uid, JSON.stringify(data));
+  } catch (e) {
+    console.error('Save error:', e);
+  }
+}
 
-        function getID() { 
-            return new URLSearchParams(location.search).get("id"); 
-        } 
+// ================= LÓGICA PRINCIPAL =================
+async function init() {
+  const uid = getPersistentUserID();
+  let data = await loadUserData(uid);
 
-        let id = getID(); 
+  if (!data) {
+    // Primera vez: asignar key aleatoria
+    const key = KEYS[Math.floor(Math.random() * KEYS.length)];
+    data = { key: key, created: Date.now() };
+    await saveUserData(uid, data);
+  } else {
+    // Ya existe: revisar si pasaron 24h
+    const elapsed = Date.now() - data.created;
+    if (elapsed >= DAY) {
+      // Renovar key
+      const key = KEYS[Math.floor(Math.random() * KEYS.length)];
+      data = { key: key, created: Date.now() };
+      await saveUserData(uid, data);
+    }
+    // Si NO pasaron 24h → mantener exactamente igual
+  }
 
-        if (!id) { 
-            const newID = generateID(); 
-            const key = KEY_LIST[Math.floor(Math.random() * KEY_LIST.length)]; 
-            localStorage.setItem("clone_" + newID, JSON.stringify({ key: key, created: Date.now() })); 
-            location.replace("?id=" + newID); 
-        } else { 
-            const stored = localStorage.getItem("clone_" + id); 
-            if (!stored) { 
-                document.getElementById("loading").innerText = "Invalid page"; 
-            } else { 
-                const data = JSON.parse(stored); 
-                document.getElementById("loading").style.display = "none"; 
-                document.getElementById("app").style.display = "flex"; 
-                document.getElementById("keyField").value = data.key; 
+  // Mostrar interfaz
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('keyField').value = data.key;
+  document.getElementById('status').innerText = 'ID: ' + uid.slice(0, 8) + '...';
 
-                function updateTimer() { 
-                    const remaining = (data.created + DAY) - Date.now(); 
-                    if (remaining <= 0) { 
-                        document.getElementById("timer").innerText = "Expired - new key on next visit"; 
-                        return; 
-                    } 
-                    const h = Math.floor(remaining / 3600000); 
-                    const m = Math.floor((remaining % 3600000) / 60000); 
-                    const s = Math.floor((remaining % 60000) / 1000); 
-                    document.getElementById("timer").innerText = "Reset in: " + h + "h " + m + "m " + s + "s"; 
-                } 
-                setInterval(updateTimer, 1000); 
-                updateTimer(); 
-            } 
-        } 
+  function updateTimer() {
+    const remaining = (data.created + DAY) - Date.now();
+    if (remaining <= 0) {
+      document.getElementById('timer').innerText = 'Recargando...';
+      location.reload();
+      return;
+    }
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('timer').innerText =
+      'Reset in: ' + h + 'h ' + m + 'm ' + s + 's';
+  }
 
-        function copyKey() { 
-            navigator.clipboard.writeText( document.getElementById("keyField").value ); 
-        }
-    </script>
+  setInterval(updateTimer, 1000);
+  updateTimer();
+}
 
+function copyKey() {
+  navigator.clipboard.writeText(document.getElementById('keyField').value);
+}
+
+init();
+</script>
 </body>
 </html>
