@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>GameForge Studio - Crea, Publica y Juega Juegos 2D</title>
-    <!-- CodeMirror (Editor con colores) -->
+    <title>GameForge Studio - Crea juegos 2D con IA</title>
+    <!-- CodeMirror para editor coloreado -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <style>
@@ -14,387 +14,404 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: #f1f5f9;
+            background: #0a0c10;
             height: 100vh;
             overflow: hidden;
         }
 
         /* Layout principal */
-        .app-container {
+        .app {
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
 
         /* Barra superior */
-        .top-bar {
-            background: #1e293b;
+        .navbar {
+            background: #11161f;
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 10px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            z-index: 10;
+            align-items: center;
+            border-bottom: 1px solid #2a2f3a;
         }
 
         .logo {
-            font-weight: bold;
             font-size: 1.5rem;
-            background: linear-gradient(135deg, #c084fc, #60a5fa);
+            font-weight: bold;
+            background: linear-gradient(135deg, #a855f7, #3b82f6);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .top-buttons {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
         .btn {
-            padding: 0.4rem 1rem;
-            border-radius: 9999px;
+            padding: 6px 14px;
             border: none;
-            font-weight: 600;
+            border-radius: 20px;
             cursor: pointer;
+            font-weight: bold;
             transition: all 0.2s;
-            font-size: 0.85rem;
         }
 
         .btn-primary {
             background: #3b82f6;
             color: white;
         }
-        .btn-primary:hover { background: #2563eb; transform: scale(0.97);}
-        .btn-success { background: #10b981; color: white;}
-        .btn-success:hover { background: #059669;}
-        .btn-warning { background: #f59e0b; color: white;}
-        .btn-outline { background: transparent; border: 1px solid #94a3b8; color: #e2e8f0;}
-        .btn-outline:hover { background: #334155;}
 
-        select, .lang-select {
-            background: #0f172a;
-            color: white;
-            border: 1px solid #475569;
-            border-radius: 2rem;
-            padding: 0.4rem 1rem;
-            font-weight: 500;
+        .btn-primary:hover {
+            background: #2563eb;
         }
 
-        /* Main split */
-        .main-split {
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #4b5563;
+            color: #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            background: #2d3748;
+        }
+
+        /* Contenedor principal dividido */
+        .main {
             display: flex;
             flex: 1;
             overflow: hidden;
-            gap: 0;
         }
 
-        /* Panel izquierdo (editor + IA + tutoriales) */
-        .left-panel {
+        /* Panel izquierdo: editor, IA, tutoriales, assets */
+        .left {
             width: 55%;
-            background: #f8fafc;
+            background: #1e1f2c;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #cbd5e1;
-            overflow-y: auto;
+            border-right: 1px solid #2d3748;
         }
 
         .tabs {
             display: flex;
-            background: #e2e8f0;
-            gap: 0.25rem;
-            padding: 0.5rem 1rem 0 1rem;
+            background: #0f1117;
+            gap: 4px;
+            padding: 8px 16px 0 16px;
         }
+
         .tab {
-            padding: 0.5rem 1.2rem;
+            padding: 8px 20px;
             cursor: pointer;
-            border-radius: 1rem 1rem 0 0;
+            border-radius: 12px 12px 0 0;
+            background: #1a1d2b;
+            color: #a0aec0;
             font-weight: 600;
-            background: #cbd5e1;
-            color: #1e293b;
         }
+
         .tab.active {
-            background: #f8fafc;
-            color: #0f172a;
+            background: #1e1f2c;
+            color: white;
             border-bottom: 2px solid #3b82f6;
         }
+
         .tab-content {
             flex: 1;
-            padding: 1rem;
+            padding: 16px;
             overflow-y: auto;
         }
-        .tab-pane {
+
+        .pane {
             display: none;
         }
-        .tab-pane.active-pane {
+
+        .pane.active-pane {
             display: block;
         }
 
         /* Editor de código */
-        .editor-area {
-            border: 1px solid #cbd5e1;
+        .code-editor-wrapper {
             border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 1rem;
+            border: 1px solid #2d3748;
+            margin-bottom: 16px;
         }
+
         .CodeMirror {
-            height: 350px;
-            font-size: 13px;
+            height: 380px;
+            font-size: 14px;
         }
 
-        /* IA asistente */
-        .ai-prompt-area {
-            background: white;
+        /* IA */
+        .ai-box {
+            background: #0f1117;
             border-radius: 16px;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        textarea {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            padding: 0.75rem;
-            font-family: monospace;
-        }
-        .ai-result {
-            background: #f1f5f9;
-            border-radius: 12px;
-            padding: 0.75rem;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
+            padding: 16px;
+            margin-bottom: 16px;
         }
 
-        /* Assets subir fotos */
+        .ai-box textarea {
+            width: 100%;
+            background: #1a1d2b;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 10px;
+            color: white;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .ai-output {
+            background: #1a1d2b;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        /* Tutoriales */
+        .tutorial-card {
+            background: #0f1117;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Assets */
         .asset-upload {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 1rem;
-            border: 1px dashed #3b82f6;
+            background: #0f1117;
+            border-radius: 16px;
+            padding: 16px;
             text-align: center;
         }
-        .image-list {
+
+        .image-gallery {
             display: flex;
-            gap: 0.5rem;
             flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-        .img-thumb {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid #cbd5e1;
+            gap: 10px;
+            margin-top: 16px;
         }
 
-        /* Panel derecho: preview + juegos populares */
-        .right-panel {
+        .img-thumb {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #3b82f6;
+        }
+
+        /* Panel derecho: preview + juegos */
+        .right {
             width: 45%;
+            background: #0a0c10;
             display: flex;
             flex-direction: column;
-            background: #0f172a;
-            color: white;
             overflow-y: auto;
         }
-        .game-canvas-container {
-            background: #1e293b;
-            padding: 1rem;
+
+        .canvas-container {
+            background: #000000;
+            padding: 20px;
             display: flex;
             justify-content: center;
-            border-bottom: 2px solid #334155;
+            border-bottom: 1px solid #2d3748;
         }
+
         canvas {
-            background: #0a0f1a;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px -5px black;
+            background: #0f172a;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             width: 100%;
-            max-width: 640px;
-            height: auto;
-            aspect-ratio: 16 / 10;
-            cursor: pointer;
+            max-width: 700px;
+            aspect-ratio: 16/10;
         }
-        .game-info-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: #111827;
+
+        .game-status {
+            padding: 8px 16px;
+            background: #11161f;
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
-        .popular-games {
+
+        .games-list {
             flex: 1;
-            padding: 1rem;
+            padding: 16px;
             overflow-y: auto;
         }
-        .game-card {
-            background: #1e293b;
-            border-radius: 1rem;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
+
+        .game-item {
+            background: #11161f;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: 0.1s;
         }
-        .game-card:hover { background: #2d3a4e; transform: translateX(4px);}
-        .game-title { font-weight: bold; }
-        .game-stats { font-size: 0.7rem; color: #94a3b8;}
 
-        /* tutorial texto */
-        .tutorial-text {
-            background: white;
-            border-radius: 20px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        .game-item:hover {
+            background: #1e2a3a;
         }
 
-        @media (max-width: 800px) {
-            .main-split { flex-direction: column; }
-            .left-panel, .right-panel { width: 100%; height: 50%; }
+        .game-title {
+            font-weight: bold;
+            color: white;
+        }
+
+        .game-meta {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        h3 {
+            color: white;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        button {
+            background: none;
+            border: none;
         }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="top-bar">
-        <div class="logo">🎮 GameForge Studio · Crea tu universo 2D</div>
-        <div class="top-buttons">
-            <select id="languageSelect" class="lang-select">
+<div class="app">
+    <div class="navbar">
+        <div class="logo">🎮 GameForge · Crea tu propio lenguaje 2D</div>
+        <div>
+            <select id="langSelect" style="background:#1e293b; color:white; border-radius:20px; padding:6px 12px; margin-right:12px;">
                 <option value="es">🇪🇸 Español</option>
                 <option value="en">🇺🇸 English</option>
             </select>
-            <button id="newGameBtn" class="btn btn-outline">✨ Nuevo juego</button>
-            <button id="saveGameBtn" class="btn btn-primary">💾 Guardar borrador</button>
-            <button id="publishGameBtn" class="btn btn-success">🚀 Publicar</button>
+            <button id="newGameBtn" class="btn btn-outline">✨ Nuevo</button>
+            <button id="saveGameBtn" class="btn btn-outline">💾 Guardar</button>
+            <button id="publishBtn" class="btn btn-success">🚀 Publicar</button>
         </div>
     </div>
-    <div class="main-split">
-        <!-- IZQUIERDA: Código, IA, Tutoriales, Assets -->
-        <div class="left-panel">
+    <div class="main">
+        <!-- Panel izquierdo -->
+        <div class="left">
             <div class="tabs">
-                <div class="tab active" data-tab="code">📝 Código (GameLang)</div>
-                <div class="tab" data-tab="ai">🤖 Asistente IA</div>
+                <div class="tab active" data-tab="code">📝 Código</div>
+                <div class="tab" data-tab="ai">🤖 IA Generadora</div>
                 <div class="tab" data-tab="tutorial">📘 Tutoriales</div>
-                <div class="tab" data-tab="assets">🖼️ Assets + Fotos</div>
+                <div class="tab" data-tab="assets">🖼️ Imágenes</div>
             </div>
             <div class="tab-content">
                 <!-- Panel Código -->
-                <div id="codePane" class="tab-pane active-pane">
-                    <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold;">✨ Lenguaje GameForge (parecido a Lua/Roblox) + miles de funciones</span>
-                        <button id="runCodeBtn" class="btn btn-primary" style="padding: 0.2rem 1rem;">▶️ Ejecutar Juego</button>
-                    </div>
-                    <div class="editor-area">
+                <div id="codePane" class="pane active-pane">
+                    <div class="code-editor-wrapper">
                         <textarea id="codeEditor"></textarea>
                     </div>
-                    <div style="font-size: 0.7rem; background:#eef2ff; padding: 0.5rem; border-radius: 12px;">
-                        💡 Funciones clave: crearSprite(x,y,w,h,color/imagen), moverSprite(id, vx, vy), gravedadGlobal(), detectarColision(), texto(), setFondo(), teclaPresionada(), puntuacion(), sonido() y +50 utilidades.
+                    <button id="runBtn" class="btn btn-primary" style="width:100%">▶️ Ejecutar Juego</button>
+                    <div style="margin-top: 10px; font-size:0.75rem; color:#94a3b8; text-align:center;">
+                        🧠 Funciones: crearSprite(id,x,y,w,h,color), moverSprite(id,vx,vy), teclaPresionada(key), setGravedad(g), detectarColision(id1,id2), sumarPuntos(p), texto(texto,x,y), setFondo(color), cargarImagenSprite(id, nombreAsset)
                     </div>
                 </div>
                 <!-- Panel IA -->
-                <div id="aiPane" class="tab-pane">
-                    <div class="ai-prompt-area">
-                        <label>🤖 Describe el juego que quieres (IA genera código completo):</label>
-                        <textarea id="aiPrompt" rows="3" placeholder="Ej: 'Un juego de plataformas donde el personaje salta con espacio, recoge monedas y evita enemigos'"></textarea>
-                        <button id="generateAiCodeBtn" class="btn btn-primary" style="margin-top: 0.5rem;">✨ Generar Código con IA</button>
-                        <div id="aiOutput" class="ai-result">La IA insertará el código directamente en el editor y previsualizará el juego.</div>
+                <div id="aiPane" class="pane">
+                    <div class="ai-box">
+                        <label style="color:white; font-weight:bold;">📝 Describe tu juego (IA escribe el código automáticamente):</label>
+                        <textarea id="aiPrompt" rows="3" placeholder="Ej: 'Un juego donde controlas una nave con flechas, disparas balas y aparecen enemigos'"></textarea>
+                        <button id="generateCodeBtn" class="btn btn-primary" style="margin-top:10px; width:100%">✨ Generar Código con IA</button>
+                        <div id="aiMessage" class="ai-output">La IA generará el código y lo pondrá en el editor. Luego ejecuta el juego.</div>
                     </div>
-                    <div class="tutorial-text">
-                        <strong>🎯 Plantillas rápidas IA:</strong> "space shooter", "juego de carreras", "pong", "plataformas", "clicker".
+                    <div class="tutorial-card">
+                        <strong>⭐ Ejemplos de prompts:</strong><br>
+                        • "plataformas con salto, recolectar monedas"<br>
+                        • "juego de carreras con obstáculos"<br>
+                        • "space shooter con meteoritos"<br>
+                        • "pong simple con dos paletas"
                     </div>
                 </div>
                 <!-- Panel Tutoriales -->
-                <div id="tutorialPane" class="tab-pane">
-                    <div class="tutorial-text"><strong>📖 PRIMEROS PASOS:</strong> Usa <code>crearSprite("player", 100,200, 40,40, "cyan")</code> para crear un jugador. En update() usa teclas.</div>
-                    <div class="tutorial-text"><strong>⚡ FUNCIONES CLAVE (más de 60):</strong><br/> 
-                    - <code>moverSprite(id, vx, vy)</code><br/>
-                    - <code>agregarFuerza(id, fx, fy)</code><br/>
-                    - <code>detectarColision(idA, idB)</code><br/>
-                    - <code>setGravedad(y)</code><br/>
-                    - <code>textoEnPantalla("Hola", x, y)</code><br/>
-                    - <code>reproducirSonido("coin")</code><br/>
-                    - <code>setImagenSprite(id, "dataURL")</code><br/>
-                    - <code>teclaPresionada("ArrowUp")</code><br/>
-                    - <code>puntuacionGlobal(sum)</code> y ranking.<br/>
-                    <strong>🎨 Sistema completo: hasta 100 sprites, físicas simples, eventos.</strong></div>
-                    <div class="tutorial-text"><strong>🌟 SUBE TUS FOTOS:</strong> En la pestaña Assets sube imágenes, úsalas como texturas de sprites.</div>
+                <div id="tutorialPane" class="pane">
+                    <div class="tutorial-card">
+                        <strong>🎮 PRIMER JUEGO</strong><br>
+                        <code>crearSprite("player", 100,300, 40,40, "#f97316");<br>
+                        setGravedad(0.8);<br>
+                        function onUpdate() {<br>
+                        &nbsp; if(teclaPresionada("ArrowRight")) moverSprite("player",4,0);<br>
+                        &nbsp; if(teclaPresionada("ArrowLeft")) moverSprite("player",-4,0);<br>
+                        &nbsp; texto("Hola mundo", 20, 50);<br>
+                        }</code>
+                    </div>
+                    <div class="tutorial-card">
+                        <strong>🖼️ USAR IMÁGENES SUBIDAS</strong><br>
+                        Sube una imagen en la pestaña "Imágenes", luego en el código usa:<br>
+                        <code>cargarImagenSprite("miSprite", "nombre_de_la_imagen.png");</code>
+                    </div>
+                    <div class="tutorial-card">
+                        <strong>🏆 PUBLICAR JUEGOS</strong><br>
+                        Guarda tu juego, luego presiona "Publicar". Aparecerá en la lista de la derecha y otros podrán jugarlo.
+                    </div>
                 </div>
-                <!-- Panel Assets / Imágenes -->
-                <div id="assetsPane" class="tab-pane">
+                <!-- Panel Assets -->
+                <div id="assetsPane" class="pane">
                     <div class="asset-upload">
                         <input type="file" id="imageUpload" accept="image/*" multiple />
-                        <p>Sube imágenes para usar como sprites (PNG/JPG). Se guardan en tu juego.</p>
-                        <div id="imageGallery" class="image-list"></div>
-                        <button id="clearAssetsBtn" class="btn btn-outline" style="margin-top: 10px;">Limpiar assets</button>
+                        <div id="gallery" class="image-gallery"></div>
+                        <button id="clearAssets" class="btn btn-outline" style="margin-top:12px;">Limpiar imágenes</button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- DERECHA: Vista previa del juego + juegos populares -->
-        <div class="right-panel">
-            <div class="game-canvas-container">
-                <canvas id="gameCanvas" width="800" height="500" style="width:100%; height:auto; background:#0b1120;"></canvas>
+        <!-- Panel derecho: canvas + juegos publicados -->
+        <div class="right">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
             </div>
-            <div class="game-info-bar">
-                <span>🎮 Vista previa EN VIVO</span>
-                <span id="gameStatus">✅ Juego activo</span>
-            </div>
-            <div class="popular-games">
-                <h3>🔥 Juegos Populares & Publicados</h3>
-                <div id="gamesListContainer">Cargando juegos...</div>
-                <button id="refreshGamesBtn" class="btn btn-outline" style="margin-top: 8px; width:100%">🔄 Actualizar</button>
+            <div class="game-status" id="gameStatus">✅ Juego listo. Presiona "Ejecutar" o genera con IA.</div>
+            <div class="games-list">
+                <h3>🔥 Juegos Populares</h3>
+                <div id="publishedGamesList">Cargando...</div>
+                <button id="refreshGames" class="btn btn-outline" style="margin-top:12px; width:100%">🔄 Actualizar</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    //  MOTOR DE JUEGO 2D PERSONALIZADO (miles de funciones estilo "GameLang")
-    // --------------------------------------------------------------
+    // -------------------- MOTOR DE JUEGO 2D --------------------
     class GameEngine {
         constructor(canvas) {
             this.ctx = canvas.getContext('2d');
             this.canvas = canvas;
-            this.sprites = new Map(); // id -> {x,y,w,h, color, img, vx, vy, visible}
-            this.gravityY = 0;
+            this.sprites = new Map();
+            this.gravity = 0;
             this.keys = {};
             this.score = 0;
-            this.customVars = {};
-            this.sounds = {}; // stub
-            this.textDraws = [];
-            this.background = "#0b1120";
+            this.texts = [];
+            this.bgColor = "#0f172a";
+            this.custom = {};
             this.frame = 0;
-            this.updateCallback = null;
-            this.startCallback = null;
-            this.initDone = false;
-            // eventos teclado
-            window.addEventListener('keydown', (e) => { this.keys[e.key] = true; });
-            window.addEventListener('keyup', (e) => { this.keys[e.key] = false; });
+            this.userUpdate = null;
+            this.userStart = null;
+            this.running = false;
+            this.images = new Map(); // nombre -> Image
+            window.addEventListener('keydown', (e) => this.keys[e.key] = true);
+            window.addEventListener('keyup', (e) => this.keys[e.key] = false);
         }
 
-        // --- API PUBLICA (miles de funciones) ---
-        crearSprite(id, x, y, w, h, colorOImagen) {
-            this.sprites.set(id, { x, y, w, h, color: colorOImagen, img: null, vx: 0, vy: 0, visible: true, tag: id });
+        // API pública
+        crearSprite(id, x, y, w, h, color) {
+            this.sprites.set(id, { x, y, w, h, color, img: null, vx: 0, vy: 0, visible: true });
             return id;
-        }
-        setImagenSprite(id, imgDataUrl) {
-            let sprite = this.sprites.get(id);
-            if(sprite) {
-                let img = new Image();
-                img.src = imgDataUrl;
-                sprite.img = img;
-                sprite.color = null;
-            }
         }
         moverSprite(id, vx, vy) {
             let s = this.sprites.get(id);
@@ -408,11 +425,7 @@
             let s = this.sprites.get(id);
             if(s) { s.x = x; s.y = y; }
         }
-        setGravedad(g) { this.gravityY = g; }
-        textoEnPantalla(texto, x, y, size=16, color="white") {
-            this.textDraws.push({texto, x, y, size, color});
-        }
-        setFondo(color) { this.background = color; }
+        setGravedad(g) { this.gravity = g; }
         teclaPresionada(key) { return !!this.keys[key]; }
         sumarPuntos(p) { this.score += p; }
         obtenerPuntos() { return this.score; }
@@ -422,51 +435,74 @@
             return (a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y);
         }
         eliminarSprite(id) { this.sprites.delete(id); }
-        // Funciones extra
-        setVariable(key, val) { this.customVars[key] = val; }
-        getVariable(key) { return this.customVars[key]; }
-        obtenerFrame() { return this.frame; }
-        // actualizar física
-        updatePhysics() {
-            for(let [id, s] of this.sprites.entries()) {
-                s.vy += this.gravityY;
-                s.x += s.vx;
-                s.y += s.vy;
-                // límites canvas
-                if(s.x < 0) s.x = 0;
-                if(s.x + s.w > this.canvas.width) s.x = this.canvas.width - s.w;
-                if(s.y + s.h > this.canvas.height) s.y = this.canvas.height - s.h;
-                if(s.y < 0) s.y = 0;
+        texto(texto, x, y, size=16, color="white") {
+            this.texts.push({texto, x, y, size, color});
+        }
+        setFondo(color) { this.bgColor = color; }
+        setVariable(key, val) { this.custom[key] = val; }
+        getVariable(key) { return this.custom[key]; }
+        cargarImagenSprite(id, assetName) {
+            let sprite = this.sprites.get(id);
+            if(sprite && this.images.has(assetName)) {
+                sprite.img = this.images.get(assetName);
+                sprite.color = null;
             }
         }
+        // registrar imagen desde asset
+        registerImage(name, dataUrl) {
+            return new Promise((resolve) => {
+                let img = new Image();
+                img.onload = () => {
+                    this.images.set(name, img);
+                    resolve();
+                };
+                img.src = dataUrl;
+            });
+        }
+
+        updatePhysics() {
+            for(let [id, s] of this.sprites.entries()) {
+                s.vy += this.gravity;
+                s.x += s.vx;
+                s.y += s.vy;
+                // bordes suaves
+                if(s.x < 0) s.x = 0;
+                if(s.x + s.w > this.canvas.width) s.x = this.canvas.width - s.w;
+                if(s.y < 0) s.y = 0;
+                if(s.y + s.h > this.canvas.height) s.y = this.canvas.height - s.h;
+            }
+        }
+
         render() {
-            this.ctx.fillStyle = this.background;
-            this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+            this.ctx.fillStyle = this.bgColor;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             for(let [id, s] of this.sprites.entries()) {
                 if(!s.visible) continue;
                 if(s.img && s.img.complete) {
                     this.ctx.drawImage(s.img, s.x, s.y, s.w, s.h);
                 } else {
-                    this.ctx.fillStyle = s.color || "#ffaa44";
+                    this.ctx.fillStyle = s.color || "#ffffff";
                     this.ctx.fillRect(s.x, s.y, s.w, s.h);
-                    this.ctx.strokeStyle = "black";
-                    this.ctx.strokeRect(s.x, s.y, s.w, s.h);
                 }
             }
-            for(let txt of this.textDraws) {
-                this.ctx.font = `${txt.size}px monospace`;
-                this.ctx.fillStyle = txt.color;
-                this.ctx.fillText(txt.texto, txt.x, txt.y);
+            for(let t of this.texts) {
+                this.ctx.font = `${t.size}px monospace`;
+                this.ctx.fillStyle = t.color;
+                this.ctx.fillText(t.texto, t.x, t.y);
             }
-            this.textDraws = [];
+            this.texts = [];
             this.ctx.fillStyle = "white";
             this.ctx.font = "bold 14px monospace";
             this.ctx.fillText(`Score: ${this.score}`, 10, 30);
         }
-        startLoop(userUpdate, userStart) {
-            if(userStart) userStart(this);
+
+        startLoop(updateFn, startFn) {
+            if(this.running) return;
+            this.running = true;
+            if(startFn) startFn(this);
             const loop = () => {
-                if(userUpdate) userUpdate(this);
+                if(!this.running) return;
+                if(updateFn) updateFn(this);
                 this.updatePhysics();
                 this.render();
                 this.frame++;
@@ -474,175 +510,161 @@
             };
             loop();
         }
+
+        stop() {
+            this.running = false;
+        }
     }
 
-    // Variables globales de la aplicación
+    // -------------------- GESTIÓN DE LA APLICACIÓN --------------------
     let currentGame = {
         id: "game_" + Date.now(),
-        title: "Mi Aventura",
-        code: `// ===== JUEGO EN GameLang =====
-// Funciones disponibles: crearSprite, moverSprite, setGravedad, teclaPresionada, etc.
-let player = crearSprite("hero", 100, 200, 40, 40, "#3b82f6");
+        title: "Mi Juego",
+        code: `// Escribe tu código aquí. Ejemplo básico:
+let jugador = crearSprite("player", 100, 300, 40, 40, "#3b82f6");
 setGravedad(0.5);
 
 function onUpdate(engine) {
-    if(teclaPresionada("ArrowRight")) moverSprite("hero", 5, 0);
-    else if(teclaPresionada("ArrowLeft")) moverSprite("hero", -5, 0);
-    if(teclaPresionada("ArrowUp") && engine.getVariable("canJump") !== false) {
-        aplicarFuerza("hero", 0, -9);
-        engine.setVariable("canJump", false);
+    if(teclaPresionada("ArrowRight")) moverSprite("player", 4, 0);
+    if(teclaPresionada("ArrowLeft")) moverSprite("player", -4, 0);
+    if(teclaPresionada("ArrowUp") && !engine.getVariable("canJump")) {
+        aplicarFuerza("player", 0, -7);
+        engine.setVariable("canJump", true);
     }
-    if(engine.detectarColision("hero", "suelo")) { engine.setVariable("canJump", true); }
-    textoEnPantalla("✨ Usa IA para más juegos!", 20, 60);
-    sumarPuntos(0);
+    if(engine.detectarColision("player", "suelo")) engine.setVariable("canJump", false);
+    texto("Presiona flechas", 20, 60);
 }
-// suelo virtual
-crearSprite("suelo", 0, 450, 800, 30, "#10b981");
-onUpdate(engine); // template
-`,
-        assets: [], // array de {name, dataURL}
-        author: "Creador",
-        plays: 0,
-        likes: 0,
-        published: false
-    };
-    let activeEngine = null;
-    let animationId = null;
-    let currentGameCode = currentGame.code;
-    let uploadedImages = []; // para asset actual
 
-    // Elementos
+crearSprite("suelo", 0, 450, 800, 30, "#10b981");
+`,
+        assets: [], // {name, dataUrl}
+        author: "Anónimo",
+        plays: 0
+    };
+
+    let activeEngine = null;
+    let uploadedAssets = []; // {name, dataUrl}
     const canvas = document.getElementById('gameCanvas');
-    const codeMirrorEditor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+    const codeMirror = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
         lineNumbers: true,
         mode: "javascript",
-        theme: "material-darker",
-        tabSize: 2,
-        extraKeys: { "Ctrl-S": () => saveGameLocally() }
+        theme: "dracula",
+        tabSize: 2
     });
-    codeMirrorEditor.setValue(currentGame.code);
-    currentGameCode = currentGame.code;
+    codeMirror.setValue(currentGame.code);
 
-    // Funciones del motor de juego con sandbox
-    function runGameFromCode(code, engine) {
-        try {
-            // Limpiar sprites anteriores
-            engine.sprites.clear();
-            engine.textDraws = [];
-            engine.score = 0;
-            engine.gravityY = 0;
-            engine.background = "#0b1120";
-            engine.customVars = {};
-            // Creamos un contexto con las funciones API
-            const apiContext = {
-                crearSprite: engine.crearSprite.bind(engine),
-                setImagenSprite: engine.setImagenSprite.bind(engine),
-                moverSprite: engine.moverSprite.bind(engine),
-                aplicarFuerza: engine.aplicarFuerza.bind(engine),
-                setPosicion: engine.setPosicion.bind(engine),
-                setGravedad: engine.setGravedad.bind(engine),
-                textoEnPantalla: engine.textoEnPantalla.bind(engine),
-                setFondo: engine.setFondo.bind(engine),
-                teclaPresionada: engine.teclaPresionada.bind(engine),
-                sumarPuntos: engine.sumarPuntos.bind(engine),
-                obtenerPuntos: engine.obtenerPuntos.bind(engine),
-                detectarColision: engine.detectarColision.bind(engine),
-                eliminarSprite: engine.eliminarSprite.bind(engine),
-                setVariable: engine.setVariable.bind(engine),
-                getVariable: engine.getVariable.bind(engine),
-                obtenerFrame: engine.obtenerFrame.bind(engine),
-                // assets de imágenes ya cargadas
-                cargarImagenSprite: (id, imgName) => {
-                    let asset = currentGame.assets.find(a=>a.name===imgName);
-                    if(asset) engine.setImagenSprite(id, asset.dataURL);
-                }
-            };
-            let userUpdate = null;
-            let userStart = null;
-            // Ejecutar código: se espera que definan funciones onUpdate y onStart
-            const funcBody = `return (function(api) { 
-                const { crearSprite, setImagenSprite, moverSprite, aplicarFuerza, setPosicion, setGravedad, textoEnPantalla, setFondo, teclaPresionada, sumarPuntos, obtenerPuntos, detectarColision, eliminarSprite, setVariable, getVariable, cargarImagenSprite, obtenerFrame } = api;
-                ${code}
-                return { onUpdate: typeof onUpdate === 'function' ? onUpdate : null, onStart: typeof onStart === 'function' ? onStart : null };
-            });`;
-            const factory = new Function('api', funcBody(apiContext));
-            const gameScript = factory(apiContext);
-            if(gameScript.onUpdate) userUpdate = gameScript.onUpdate;
-            if(gameScript.onStart) userStart = gameScript.onStart;
-            engine.startLoop(userUpdate, userStart);
-            return true;
-        } catch(e) {
-            console.error(e);
-            document.getElementById('gameStatus').innerText = "⚠️ Error en código: " + e.message;
-            return false;
+    // Ejecutar juego desde el código actual
+    function runGame() {
+        if(activeEngine) {
+            activeEngine.stop();
         }
-    }
-
-    function startPreview() {
-        if(activeEngine) { /* reiniciar */ }
         const engine = new GameEngine(canvas);
         activeEngine = engine;
-        runGameFromCode(codeMirrorEditor.getValue(), engine);
-        document.getElementById('gameStatus').innerText = "🎮 Jugando en vivo";
+
+        // Registrar assets subidos
+        Promise.all(uploadedAssets.map(asset => engine.registerImage(asset.name, asset.dataUrl)))
+            .then(() => {
+                const code = codeMirror.getValue();
+                try {
+                    // Crear un contexto de funciones para el usuario
+                    const api = {
+                        crearSprite: engine.crearSprite.bind(engine),
+                        moverSprite: engine.moverSprite.bind(engine),
+                        aplicarFuerza: engine.aplicarFuerza.bind(engine),
+                        setPosicion: engine.setPosicion.bind(engine),
+                        setGravedad: engine.setGravedad.bind(engine),
+                        teclaPresionada: engine.teclaPresionada.bind(engine),
+                        sumarPuntos: engine.sumarPuntos.bind(engine),
+                        obtenerPuntos: engine.obtenerPuntos.bind(engine),
+                        detectarColision: engine.detectarColision.bind(engine),
+                        eliminarSprite: engine.eliminarSprite.bind(engine),
+                        texto: engine.texto.bind(engine),
+                        setFondo: engine.setFondo.bind(engine),
+                        setVariable: engine.setVariable.bind(engine),
+                        getVariable: engine.getVariable.bind(engine),
+                        cargarImagenSprite: engine.cargarImagenSprite.bind(engine),
+                    };
+                    // Evaluar código en un entorno controlado
+                    const funcBody = `return (function(api) { 
+                        const { crearSprite, moverSprite, aplicarFuerza, setPosicion, setGravedad, teclaPresionada, sumarPuntos, obtenerPuntos, detectarColision, eliminarSprite, texto, setFondo, setVariable, getVariable, cargarImagenSprite } = api;
+                        ${code}
+                        return { onUpdate: typeof onUpdate === 'function' ? onUpdate : null, onStart: typeof onStart === 'function' ? onStart : null };
+                    });`;
+                    const factory = new Function('api', funcBody);
+                    const gameScript = factory(api);
+                    engine.startLoop(gameScript.onUpdate, gameScript.onStart);
+                    document.getElementById('gameStatus').innerHTML = "🎮 Juego ejecutándose correctamente";
+                } catch(e) {
+                    console.error(e);
+                    document.getElementById('gameStatus').innerHTML = "❌ Error en código: " + e.message;
+                }
+            });
     }
 
-    // Guardar localmente
-    function saveGameLocally() {
-        currentGame.code = codeMirrorEditor.getValue();
-        currentGame.assets = uploadedImages.map(img => ({ name: img.name, dataURL: img.dataURL }));
-        localStorage.setItem("current_draft_game", JSON.stringify(currentGame));
-        alert("Borrador guardado localmente ✅");
+    // Guardar borrador local
+    function saveDraft() {
+        currentGame.code = codeMirror.getValue();
+        currentGame.assets = uploadedAssets;
+        localStorage.setItem("gameforge_draft", JSON.stringify(currentGame));
+        document.getElementById('gameStatus').innerHTML = "💾 Borrador guardado en el navegador";
     }
 
     function loadDraft() {
-        let saved = localStorage.getItem("current_draft_game");
+        let saved = localStorage.getItem("gameforge_draft");
         if(saved) {
-            try{
+            try {
                 let data = JSON.parse(saved);
-                currentGame = {...currentGame, ...data};
-                codeMirrorEditor.setValue(currentGame.code);
-                uploadedImages = currentGame.assets || [];
+                currentGame = { ...currentGame, ...data };
+                codeMirror.setValue(currentGame.code);
+                uploadedAssets = currentGame.assets || [];
                 refreshGallery();
-            }catch(e){}
+                runGame();
+            } catch(e) {}
+        } else {
+            runGame();
         }
-        startPreview();
     }
 
-    // Publicar en la lista global
+    // Publicar juego
     function publishGame() {
-        currentGame.code = codeMirrorEditor.getValue();
-        currentGame.assets = uploadedImages.map(img => ({ name: img.name, dataURL: img.dataURL }));
+        currentGame.code = codeMirror.getValue();
+        currentGame.assets = uploadedAssets;
         currentGame.author = "Creador_" + Math.floor(Math.random()*1000);
-        currentGame.published = true;
         currentGame.plays = 0;
-        let publishedDB = JSON.parse(localStorage.getItem("published_games") || "[]");
-        let existing = publishedDB.find(g => g.id === currentGame.id);
+        let games = JSON.parse(localStorage.getItem("published_games") || "[]");
+        let existing = games.find(g => g.id === currentGame.id);
         if(existing) {
             existing.code = currentGame.code;
             existing.assets = currentGame.assets;
-            existing.title = currentGame.title || "Juego sin título";
+            existing.title = currentGame.title;
         } else {
-            publishedDB.push({...currentGame, title: currentGame.title || "Aventura 2D", createdAt: Date.now()});
+            games.push({ ...currentGame, title: "Juego " + (games.length+1), createdAt: Date.now() });
         }
-        localStorage.setItem("published_games", JSON.stringify(publishedDB));
-        alert("🎉 Juego publicado! Aparecerá en la lista de populares.");
+        localStorage.setItem("published_games", JSON.stringify(games));
+        alert("✅ Juego publicado. Aparecerá en la lista de populares.");
         refreshGamesList();
     }
 
     function refreshGamesList() {
         let games = JSON.parse(localStorage.getItem("published_games") || "[]");
-        const container = document.getElementById("gamesListContainer");
-        if(games.length === 0) { container.innerHTML = "<div>No hay juegos publicados, ¡sé el primero!</div>"; return; }
+        const container = document.getElementById("publishedGamesList");
+        if(games.length === 0) {
+            container.innerHTML = "<div style='color:#94a3b8;'>No hay juegos publicados. ¡Sé el primero!</div>";
+            return;
+        }
         container.innerHTML = games.map(game => `
-            <div class="game-card" data-id="${game.id}">
-                <div><div class="game-title">${game.title}</div><div class="game-stats">👤 ${game.author} | ▶️ ${game.plays || 0} plays</div></div>
-                <button class="btn btn-primary play-pub-btn" data-id="${game.id}">Jugar</button>
+            <div class="game-item" data-id="${game.id}">
+                <div>
+                    <div class="game-title">${game.title}</div>
+                    <div class="game-meta">👤 ${game.author} | 🎮 ${game.plays || 0} jugadas</div>
+                </div>
+                <button class="btn btn-primary play-game-btn" data-id="${game.id}" style="padding:4px 12px;">Jugar</button>
             </div>
         `).join('');
-        document.querySelectorAll('.play-pub-btn').forEach(btn => {
+        document.querySelectorAll('.play-game-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                let id = btn.getAttribute('data-id');
+                const id = btn.getAttribute('data-id');
                 loadPublishedGame(id);
             });
         });
@@ -654,118 +676,152 @@ onUpdate(engine); // template
         if(game) {
             game.plays = (game.plays || 0) + 1;
             localStorage.setItem("published_games", JSON.stringify(games));
-            codeMirrorEditor.setValue(game.code);
-            uploadedImages = game.assets || [];
+            codeMirror.setValue(game.code);
+            uploadedAssets = game.assets || [];
             refreshGallery();
-            currentGame = {...currentGame, id: game.id, code: game.code, assets: game.assets};
-            startPreview();
+            currentGame = { ...currentGame, id: game.id, code: game.code, assets: game.assets };
+            runGame();
             alert("Cargado: " + game.title);
         }
     }
 
-    function refreshGallery() {
-        const gallery = document.getElementById("imageGallery");
-        gallery.innerHTML = "";
-        uploadedImages.forEach((img, idx) => {
-            let thumb = document.createElement("img");
-            thumb.src = img.dataURL;
-            thumb.className = "img-thumb";
-            thumb.title = img.name;
-            gallery.appendChild(thumb);
-        });
-    }
-
-    // IA Generadora de código (simula generación inteligente)
-    function generateAICode(promptText) {
-        let lower = promptText.toLowerCase();
+    // IA generadora de código (simula un asistente inteligente)
+    function generateGameCode(promptText) {
+        const lower = promptText.toLowerCase();
         if(lower.includes("plataforma") || lower.includes("saltar")) {
-            return `// Juego de plataformas IA
-let jugador = crearSprite("player", 100, 300, 40, 40, "#f97316");
-setGravedad(0.8);
-crearSprite("suelo", 0, 450, 800, 30, "#a5f3fc");
-crearSprite("moneda", 400, 380, 20, 20, "gold");
+            return `// Juego de plataformas generado por IA
+let jugador = crearSprite("player", 100, 350, 40, 40, "#f97316");
+setGravedad(0.7);
+crearSprite("suelo", 0, 450, 800, 30, "#a3e635");
+crearSprite("moneda", 400, 380, 20, 20, "#facc15");
+let monedasRecogidas = 0;
+
 function onUpdate(engine) {
     if(teclaPresionada("ArrowRight")) moverSprite("player", 4, 0);
     if(teclaPresionada("ArrowLeft")) moverSprite("player", -4, 0);
-    if(teclaPresionada("ArrowUp") && engine.getVariable("canJump") !== false) { aplicarFuerza("player", 0, -7); engine.setVariable("canJump", false);}
-    if(detectarColision("player", "suelo")) engine.setVariable("canJump", true);
-    if(detectarColision("player", "moneda")) { sumarPuntos(10); eliminarSprite("moneda"); textoEnPantalla("+10", 200, 100);}
-    textoEnPantalla("⭐ IA generó este juego", 20, 50);
+    if(teclaPresionada("ArrowUp") && !engine.getVariable("enAire")) {
+        aplicarFuerza("player", 0, -8);
+        engine.setVariable("enAire", true);
+    }
+    if(detectarColision("player", "suelo")) engine.setVariable("enAire", false);
+    if(detectarColision("player", "moneda")) {
+        sumarPuntos(10);
+        eliminarSprite("moneda");
+        texto("+10", 200, 100);
+    }
+    texto("Recoge la moneda dorada", 20, 60);
+    texto("Puntos: " + obtenerPuntos(), 20, 90);
 }`;
         } else if(lower.includes("shooter") || lower.includes("disparar")) {
             return `// Space Shooter IA
-crearSprite("nave", 400, 400, 40, 40, "cyan");
-function onUpdate(engine){
-    if(teclaPresionada("ArrowLeft")) moverSprite("nave", -5,0);
-    if(teclaPresionada("ArrowRight")) moverSprite("nave",5,0);
-    textoEnPantalla("🔥 SHooter - IA code", 20,40);
+let nave = crearSprite("nave", 400, 400, 40, 40, "#06b6d4");
+let balas = [];
+
+function onUpdate(engine) {
+    if(teclaPresionada("ArrowLeft")) moverSprite("nave", -5, 0);
+    if(teclaPresionada("ArrowRight")) moverSprite("nave", 5, 0);
+    if(teclaPresionada(" ")) {
+        let b = crearSprite("bala"+engine.frame, nave.x+20, nave.y, 5, 10, "#facc15");
+        moverSprite(b, 0, -8);
+        balas.push(b);
+    }
+    texto("Space Shooter - Dispara con espacio", 20, 50);
 }`;
         } else {
-            return `// Juego personalizado IA: ${promptText.substring(0,50)}
-let cubo = crearSprite("hero", 200,200, 50,50, "#c084fc");
-setGravedad(0.2);
-function onUpdate(){
-    if(teclaPresionada("ArrowRight")) moverSprite("hero",3,0);
-    if(teclaPresionada("ArrowLeft")) moverSprite("hero",-3,0);
-    textoEnPantalla("🎨 IA: " + "${promptText.slice(0,30)}", 20, 70);
-}`;
+            return `// Juego creado con IA: ${promptText.slice(0, 50)}
+let cubo = crearSprite("hero", 200, 300, 50, 50, "#c084fc");
+setGravedad(0.3);
+
+function onUpdate(engine) {
+    if(teclaPresionada("ArrowRight")) moverSprite("hero", 5, 0);
+    if(teclaPresionada("ArrowLeft")) moverSprite("hero", -5, 0);
+    if(teclaPresionada("ArrowUp") && !engine.getVariable("saltando")) {
+        aplicarFuerza("hero", 0, -6);
+        engine.setVariable("saltando", true);
+    }
+    if(detectarColision("hero", "suelo")) engine.setVariable("saltando", false);
+    texto("Movimiento con flechas", 20, 60);
+}
+crearSprite("suelo", 0, 450, 800, 30, "#6b7280");
+`;
         }
     }
 
-    // Eventos
-    document.getElementById('runCodeBtn').addEventListener('click', () => startPreview());
-    document.getElementById('saveGameBtn').addEventListener('click', saveGameLocally);
-    document.getElementById('publishGameBtn').addEventListener('click', publishGame);
-    document.getElementById('generateAiCodeBtn').addEventListener('click', () => {
-        let prompt = document.getElementById('aiPrompt').value;
-        if(!prompt) prompt = "juego simple con movimiento";
-        let newCode = generateAICode(prompt);
-        codeMirrorEditor.setValue(newCode);
-        document.getElementById('aiOutput').innerHTML = "✅ IA generó el código y lo insertó en el editor. ¡Ejecuta el juego!";
-        startPreview();
-    });
-    document.getElementById('refreshGamesBtn').addEventListener('click', refreshGamesList);
+    // Eventos UI
+    document.getElementById('runBtn').addEventListener('click', runGame);
+    document.getElementById('saveGameBtn').addEventListener('click', saveDraft);
+    document.getElementById('publishBtn').addEventListener('click', publishGame);
+    document.getElementById('refreshGames').addEventListener('click', refreshGamesList);
     document.getElementById('newGameBtn').addEventListener('click', () => {
-        if(confirm("¿Nuevo juego? Se perderán cambios sin guardar")) {
-            let newId = "game_" + Date.now();
-            currentGame = { id: newId, title: "Nuevo juego", code: `// Escribe tu propio código GameLang\ncrearSprite("hero", 100,200, 40,40, "#3b82f6");\nfunction onUpdate(){ textoEnPantalla("Hola mundo", 100,100);}`, assets: [], author: "Creador", plays:0 };
-            codeMirrorEditor.setValue(currentGame.code);
-            uploadedImages = [];
+        if(confirm("Nuevo juego: se perderán cambios no guardados")) {
+            codeMirror.setValue(`// Crea tu propio juego
+let jugador = crearSprite("player", 200, 300, 40, 40, "#3b82f6");
+function onUpdate() {
+    if(teclaPresionada("ArrowRight")) moverSprite("player", 3, 0);
+    if(teclaPresionada("ArrowLeft")) moverSprite("player", -3, 0);
+    texto("¡Hola! Usa IA para más ideas", 20, 50);
+}`);
+            uploadedAssets = [];
             refreshGallery();
-            startPreview();
+            runGame();
         }
     });
-    // subir imágenes
-    document.getElementById('imageUpload').addEventListener('change', (e) => {
+    document.getElementById('generateCodeBtn').addEventListener('click', () => {
+        let prompt = document.getElementById('aiPrompt').value;
+        if(!prompt.trim()) prompt = "juego simple con movimiento";
+        let newCode = generateGameCode(prompt);
+        codeMirror.setValue(newCode);
+        document.getElementById('aiMessage').innerHTML = "✅ IA generó el código y lo insertó. Presiona 'Ejecutar Juego' para probarlo.";
+        runGame();
+    });
+
+    // Subida de imágenes
+    const imageInput = document.getElementById('imageUpload');
+    const gallery = document.getElementById('gallery');
+    function refreshGallery() {
+        gallery.innerHTML = "";
+        uploadedAssets.forEach(asset => {
+            let img = document.createElement('img');
+            img.src = asset.dataUrl;
+            img.className = "img-thumb";
+            gallery.appendChild(img);
+        });
+    }
+    imageInput.addEventListener('change', (e) => {
         for(let file of e.target.files) {
             let reader = new FileReader();
             reader.onload = (ev) => {
-                uploadedImages.push({ name: file.name, dataURL: ev.target.result });
+                uploadedAssets.push({ name: file.name, dataUrl: ev.target.result });
                 refreshGallery();
             };
             reader.readAsDataURL(file);
         }
     });
-    document.getElementById('clearAssetsBtn').addEventListener('click', () => { uploadedImages = []; refreshGallery(); });
-    // TABS
+    document.getElementById('clearAssets').addEventListener('click', () => {
+        uploadedAssets = [];
+        refreshGallery();
+    });
+
+    // Tabs
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             let target = tab.getAttribute('data-tab');
-            document.querySelectorAll('.tab-pane').forEach(pane=>pane.classList.remove('active-pane'));
+            document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
             document.getElementById(target+'Pane').classList.add('active-pane');
         });
     });
-    // idioma
-    document.getElementById('languageSelect').addEventListener('change', (e) => {
-        let lang = e.target.value;
-        if(lang === 'es') alert("Idioma Español: interfaz actualizada");
-        else alert("Language set to English");
+
+    // Idioma simple
+    document.getElementById('langSelect').addEventListener('change', (e) => {
+        if(e.target.value === 'es') alert("Idioma cambiado a Español (interfaz en español)");
+        else alert("Language changed to English");
     });
+
+    // Inicializar
     loadDraft();
     refreshGamesList();
-    setInterval(() => { refreshGamesList(); }, 30000);
 </script>
 </body>
 </html>
