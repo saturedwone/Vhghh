@@ -770,63 +770,69 @@ function getID() {
 }
 
 // ================= LÓGICA PRINCIPAL =================
-let id = getID();
+// Todo está envuelto en esta función para que el código funcione correctamente.
+function iniciarSistema() {
+    let id = getID();
 
-if (!id) {
-    const lastID = localStorage.getItem(LAST_CLONE_KEY);
-    
-    if (lastID) {
-        const stored = localStorage.getItem("clone_" + lastID);
-        if (stored) {
-            const data = JSON.parse(stored);
-            const remaining = (data.created + DAY) - Date.now();
-            if (remaining > 0) {
-                location.replace("?id=" + lastID);
-                return;
+    if (!id) {
+        const lastID = localStorage.getItem(LAST_CLONE_KEY);
+        
+        if (lastID) {
+            const stored = localStorage.getItem("clone_" + lastID);
+            if (stored) {
+                const data = JSON.parse(stored);
+                const remaining = (data.created + DAY) - Date.now();
+                if (remaining > 0) {
+                    location.replace("?id=" + lastID);
+                    return; // Ahora sí es completamente legal usar return aquí
+                }
             }
         }
-    }
 
-    const newID = generateID();
-    const key = KEY_LIST[Math.floor(Math.random() * KEY_LIST.length)];
+        const newID = generateID();
+        const key = KEY_LIST[Math.floor(Math.random() * KEY_LIST.length)];
 
-    localStorage.setItem("clone_" + newID, JSON.stringify({
-        key: key,
-        created: Date.now()
-    }));
+        localStorage.setItem("clone_" + newID, JSON.stringify({
+            key: key,
+            created: Date.now()
+        }));
 
-    localStorage.setItem(LAST_CLONE_KEY, newID);
-    location.replace("?id=" + newID);
+        localStorage.setItem(LAST_CLONE_KEY, newID);
+        location.replace("?id=" + newID);
 
-} else {
-    const stored = localStorage.getItem("clone_" + id);
-
-    if (!stored) {
-        document.getElementById("loading").innerText = "Clon inválido";
     } else {
-        const data = JSON.parse(stored);
+        const stored = localStorage.getItem("clone_" + id);
 
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("app").style.display = "flex";
+        if (!stored) {
+            document.getElementById("loading").innerText = "Clon inválido";
+        } else {
+            const data = JSON.parse(stored);
 
-        document.getElementById("keyField").value = data.key;
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("app").style.display = "flex";
 
-        function updateTimer() {
-            const remaining = (data.created + DAY) - Date.now();
-            if (remaining <= 0) {
-                document.getElementById("timer").innerText = "Expired - visita la página principal para nueva key";
-                return;
+            document.getElementById("keyField").value = data.key;
+
+            function updateTimer() {
+                const remaining = (data.created + DAY) - Date.now();
+                if (remaining <= 0) {
+                    document.getElementById("timer").innerText = "Expired - visita la página principal para nueva key";
+                    return;
+                }
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                document.getElementById("timer").innerText = `Reset en: ${h}h ${m}m ${s}s`;
             }
-            const h = Math.floor(remaining / 3600000);
-            const m = Math.floor((remaining % 3600000) / 60000);
-            const s = Math.floor((remaining % 60000) / 1000);
-            document.getElementById("timer").innerText = `Reset en: ${h}h ${m}m ${s}s`;
-        }
 
-        setInterval(updateTimer, 1000);
-        updateTimer();
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        }
     }
 }
+
+// Ejecutamos la lógica inmediatamente
+iniciarSistema();
 
 function copyKey() {
     navigator.clipboard.writeText(document.getElementById("keyField").value);
