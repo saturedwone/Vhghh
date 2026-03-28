@@ -1,827 +1,836 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>GameForge Studio - Crea juegos 2D con IA</title>
-    <!-- CodeMirror para editor coloreado -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: #0a0c10;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Layout principal */
-        .app {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Barra superior */
-        .navbar {
-            background: #11161f;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2a2f3a;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .btn {
-            padding: 6px 14px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #4b5563;
-            color: #e2e8f0;
-        }
-
-        .btn-outline:hover {
-            background: #2d3748;
-        }
-
-        /* Contenedor principal dividido */
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* Panel izquierdo: editor, IA, tutoriales, assets */
-        .left {
-            width: 55%;
-            background: #1e1f2c;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #2d3748;
-        }
-
-        .tabs {
-            display: flex;
-            background: #0f1117;
-            gap: 4px;
-            padding: 8px 16px 0 16px;
-        }
-
-        .tab {
-            padding: 8px 20px;
-            cursor: pointer;
-            border-radius: 12px 12px 0 0;
-            background: #1a1d2b;
-            color: #a0aec0;
-            font-weight: 600;
-        }
-
-        .tab.active {
-            background: #1e1f2c;
-            color: white;
-            border-bottom: 2px solid #3b82f6;
-        }
-
-        .tab-content {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .pane {
-            display: none;
-        }
-
-        .pane.active-pane {
-            display: block;
-        }
-
-        /* Editor de código */
-        .code-editor-wrapper {
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #2d3748;
-            margin-bottom: 16px;
-        }
-
-        .CodeMirror {
-            height: 380px;
-            font-size: 14px;
-        }
-
-        /* IA */
-        .ai-box {
-            background: #0f1117;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .ai-box textarea {
-            width: 100%;
-            background: #1a1d2b;
-            border: 1px solid #2d3748;
-            border-radius: 12px;
-            padding: 10px;
-            color: white;
-            font-family: monospace;
-            resize: vertical;
-        }
-
-        .ai-output {
-            background: #1a1d2b;
-            border-radius: 12px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #cbd5e1;
-        }
-
-        /* Tutoriales */
-        .tutorial-card {
-            background: #0f1117;
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 12px;
-            border-left: 4px solid #3b82f6;
-        }
-
-        /* Assets */
-        .asset-upload {
-            background: #0f1117;
-            border-radius: 16px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 16px;
-        }
-
-        .img-thumb {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid #3b82f6;
-        }
-
-        /* Panel derecho: preview + juegos */
-        .right {
-            width: 45%;
-            background: #0a0c10;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .canvas-container {
-            background: #000000;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            border-bottom: 1px solid #2d3748;
-        }
-
-        canvas {
-            background: #0f172a;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 700px;
-            aspect-ratio: 16/10;
-        }
-
-        .game-status {
-            padding: 8px 16px;
-            background: #11161f;
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-
-        .games-list {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .game-item {
-            background: #11161f;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .game-item:hover {
-            background: #1e2a3a;
-        }
-
-        .game-title {
-            font-weight: bold;
-            color: white;
-        }
-
-        .game-meta {
-            font-size: 0.7rem;
-            color: #94a3b8;
-        }
-
-        h3 {
-            color: white;
-            margin-bottom: 12px;
-            font-size: 1.2rem;
-        }
-
-        button {
-            background: none;
-            border: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Satured Hub</title>
+<style>
+body {
+    margin: 0;
+    background: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+#loading {
+    font-size: 16px;
+    color: #888;
+}
+#app {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+input {
+    width: 420px;
+    padding: 12px;
+    text-align: center;
+    font-size: 15px;
+    border: none;
+    margin-bottom: 15px;
+}
+button {
+    padding: 10px 30px;
+    font-size: 15px;
+    cursor: pointer;
+    background: #fff;
+    border: none;
+}
+button:hover {
+    background: #ddd;
+}
+#timer {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #777;
+}
+</style>
 </head>
 <body>
-<div class="app">
-    <div class="navbar">
-        <div class="logo">🎮 GameForge · Crea tu propio lenguaje 2D</div>
-        <div>
-            <select id="langSelect" style="background:#1e293b; color:white; border-radius:20px; padding:6px 12px; margin-right:12px;">
-                <option value="es">🇪🇸 Español</option>
-                <option value="en">🇺🇸 English</option>
-            </select>
-            <button id="newGameBtn" class="btn btn-outline">✨ Nuevo</button>
-            <button id="saveGameBtn" class="btn btn-outline">💾 Guardar</button>
-            <button id="publishBtn" class="btn btn-success">🚀 Publicar</button>
-        </div>
-    </div>
-    <div class="main">
-        <!-- Panel izquierdo -->
-        <div class="left">
-            <div class="tabs">
-                <div class="tab active" data-tab="code">📝 Código</div>
-                <div class="tab" data-tab="ai">🤖 IA Generadora</div>
-                <div class="tab" data-tab="tutorial">📘 Tutoriales</div>
-                <div class="tab" data-tab="assets">🖼️ Imágenes</div>
-            </div>
-            <div class="tab-content">
-                <!-- Panel Código -->
-                <div id="codePane" class="pane active-pane">
-                    <div class="code-editor-wrapper">
-                        <textarea id="codeEditor"></textarea>
-                    </div>
-                    <button id="runBtn" class="btn btn-primary" style="width:100%">▶️ Ejecutar Juego</button>
-                    <div style="margin-top: 10px; font-size:0.75rem; color:#94a3b8; text-align:center;">
-                        🧠 Funciones: crearSprite(id,x,y,w,h,color), moverSprite(id,vx,vy), teclaPresionada(key), setGravedad(g), detectarColision(id1,id2), sumarPuntos(p), texto(texto,x,y), setFondo(color), cargarImagenSprite(id, nombreAsset)
-                    </div>
-                </div>
-                <!-- Panel IA -->
-                <div id="aiPane" class="pane">
-                    <div class="ai-box">
-                        <label style="color:white; font-weight:bold;">📝 Describe tu juego (IA escribe el código automáticamente):</label>
-                        <textarea id="aiPrompt" rows="3" placeholder="Ej: 'Un juego donde controlas una nave con flechas, disparas balas y aparecen enemigos'"></textarea>
-                        <button id="generateCodeBtn" class="btn btn-primary" style="margin-top:10px; width:100%">✨ Generar Código con IA</button>
-                        <div id="aiMessage" class="ai-output">La IA generará el código y lo pondrá en el editor. Luego ejecuta el juego.</div>
-                    </div>
-                    <div class="tutorial-card">
-                        <strong>⭐ Ejemplos de prompts:</strong><br>
-                        • "plataformas con salto, recolectar monedas"<br>
-                        • "juego de carreras con obstáculos"<br>
-                        • "space shooter con meteoritos"<br>
-                        • "pong simple con dos paletas"
-                    </div>
-                </div>
-                <!-- Panel Tutoriales -->
-                <div id="tutorialPane" class="pane">
-                    <div class="tutorial-card">
-                        <strong>🎮 PRIMER JUEGO</strong><br>
-                        <code>crearSprite("player", 100,300, 40,40, "#f97316");<br>
-                        setGravedad(0.8);<br>
-                        function onUpdate() {<br>
-                        &nbsp; if(teclaPresionada("ArrowRight")) moverSprite("player",4,0);<br>
-                        &nbsp; if(teclaPresionada("ArrowLeft")) moverSprite("player",-4,0);<br>
-                        &nbsp; texto("Hola mundo", 20, 50);<br>
-                        }</code>
-                    </div>
-                    <div class="tutorial-card">
-                        <strong>🖼️ USAR IMÁGENES SUBIDAS</strong><br>
-                        Sube una imagen en la pestaña "Imágenes", luego en el código usa:<br>
-                        <code>cargarImagenSprite("miSprite", "nombre_de_la_imagen.png");</code>
-                    </div>
-                    <div class="tutorial-card">
-                        <strong>🏆 PUBLICAR JUEGOS</strong><br>
-                        Guarda tu juego, luego presiona "Publicar". Aparecerá en la lista de la derecha y otros podrán jugarlo.
-                    </div>
-                </div>
-                <!-- Panel Assets -->
-                <div id="assetsPane" class="pane">
-                    <div class="asset-upload">
-                        <input type="file" id="imageUpload" accept="image/*" multiple />
-                        <div id="gallery" class="image-gallery"></div>
-                        <button id="clearAssets" class="btn btn-outline" style="margin-top:12px;">Limpiar imágenes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Panel derecho: canvas + juegos publicados -->
-        <div class="right">
-            <div class="canvas-container">
-                <canvas id="gameCanvas" width="800" height="500"></canvas>
-            </div>
-            <div class="game-status" id="gameStatus">✅ Juego listo. Presiona "Ejecutar" o genera con IA.</div>
-            <div class="games-list">
-                <h3>🔥 Juegos Populares</h3>
-                <div id="publishedGamesList">Cargando...</div>
-                <button id="refreshGames" class="btn btn-outline" style="margin-top:12px; width:100%">🔄 Actualizar</button>
-            </div>
-        </div>
-    </div>
+
+<div id="loading">Inicializando...</div>
+
+<div id="app">
+    <input id="keyField" readonly>
+    <button onclick="copyKey()">Copiar Key</button>
+    <div id="timer"></div>
 </div>
 
 <script>
-    // -------------------- MOTOR DE JUEGO 2D --------------------
-    class GameEngine {
-        constructor(canvas) {
-            this.ctx = canvas.getContext('2d');
-            this.canvas = canvas;
-            this.sprites = new Map();
-            this.gravity = 0;
-            this.keys = {};
-            this.score = 0;
-            this.texts = [];
-            this.bgColor = "#0f172a";
-            this.custom = {};
-            this.frame = 0;
-            this.userUpdate = null;
-            this.userStart = null;
-            this.running = false;
-            this.images = new Map(); // nombre -> Image
-            window.addEventListener('keydown', (e) => this.keys[e.key] = true);
-            window.addEventListener('keyup', (e) => this.keys[e.key] = false);
-        }
-
-        // API pública
-        crearSprite(id, x, y, w, h, color) {
-            this.sprites.set(id, { x, y, w, h, color, img: null, vx: 0, vy: 0, visible: true });
-            return id;
-        }
-        moverSprite(id, vx, vy) {
-            let s = this.sprites.get(id);
-            if(s) { s.vx = vx; s.vy = vy; }
-        }
-        aplicarFuerza(id, fx, fy) {
-            let s = this.sprites.get(id);
-            if(s) { s.vx += fx; s.vy += fy; }
-        }
-        setPosicion(id, x, y) {
-            let s = this.sprites.get(id);
-            if(s) { s.x = x; s.y = y; }
-        }
-        setGravedad(g) { this.gravity = g; }
-        teclaPresionada(key) { return !!this.keys[key]; }
-        sumarPuntos(p) { this.score += p; }
-        obtenerPuntos() { return this.score; }
-        detectarColision(idA, idB) {
-            let a = this.sprites.get(idA), b = this.sprites.get(idB);
-            if(!a||!b) return false;
-            return (a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y);
-        }
-        eliminarSprite(id) { this.sprites.delete(id); }
-        texto(texto, x, y, size=16, color="white") {
-            this.texts.push({texto, x, y, size, color});
-        }
-        setFondo(color) { this.bgColor = color; }
-        setVariable(key, val) { this.custom[key] = val; }
-        getVariable(key) { return this.custom[key]; }
-        cargarImagenSprite(id, assetName) {
-            let sprite = this.sprites.get(id);
-            if(sprite && this.images.has(assetName)) {
-                sprite.img = this.images.get(assetName);
-                sprite.color = null;
-            }
-        }
-        // registrar imagen desde asset
-        registerImage(name, dataUrl) {
-            return new Promise((resolve) => {
-                let img = new Image();
-                img.onload = () => {
-                    this.images.set(name, img);
-                    resolve();
-                };
-                img.src = dataUrl;
-            });
-        }
-
-        updatePhysics() {
-            for(let [id, s] of this.sprites.entries()) {
-                s.vy += this.gravity;
-                s.x += s.vx;
-                s.y += s.vy;
-                // bordes suaves
-                if(s.x < 0) s.x = 0;
-                if(s.x + s.w > this.canvas.width) s.x = this.canvas.width - s.w;
-                if(s.y < 0) s.y = 0;
-                if(s.y + s.h > this.canvas.height) s.y = this.canvas.height - s.h;
-            }
-        }
-
-        render() {
-            this.ctx.fillStyle = this.bgColor;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            for(let [id, s] of this.sprites.entries()) {
-                if(!s.visible) continue;
-                if(s.img && s.img.complete) {
-                    this.ctx.drawImage(s.img, s.x, s.y, s.w, s.h);
-                } else {
-                    this.ctx.fillStyle = s.color || "#ffffff";
-                    this.ctx.fillRect(s.x, s.y, s.w, s.h);
-                }
-            }
-            for(let t of this.texts) {
-                this.ctx.font = `${t.size}px monospace`;
-                this.ctx.fillStyle = t.color;
-                this.ctx.fillText(t.texto, t.x, t.y);
-            }
-            this.texts = [];
-            this.ctx.fillStyle = "white";
-            this.ctx.font = "bold 14px monospace";
-            this.ctx.fillText(`Score: ${this.score}`, 10, 30);
-        }
-
-        startLoop(updateFn, startFn) {
-            if(this.running) return;
-            this.running = true;
-            if(startFn) startFn(this);
-            const loop = () => {
-                if(!this.running) return;
-                if(updateFn) updateFn(this);
-                this.updatePhysics();
-                this.render();
-                this.frame++;
-                requestAnimationFrame(loop);
-            };
-            loop();
-        }
-
-        stop() {
-            this.running = false;
-        }
-    }
-
-    // -------------------- GESTIÓN DE LA APLICACIÓN --------------------
-    let currentGame = {
-        id: "game_" + Date.now(),
-        title: "Mi Juego",
-        code: `// Escribe tu código aquí. Ejemplo básico:
-let jugador = crearSprite("player", 100, 300, 40, 40, "#3b82f6");
-setGravedad(0.5);
-
-function onUpdate(engine) {
-    if(teclaPresionada("ArrowRight")) moverSprite("player", 4, 0);
-    if(teclaPresionada("ArrowLeft")) moverSprite("player", -4, 0);
-    if(teclaPresionada("ArrowUp") && !engine.getVariable("canJump")) {
-        aplicarFuerza("player", 0, -7);
-        engine.setVariable("canJump", true);
-    }
-    if(engine.detectarColision("player", "suelo")) engine.setVariable("canJump", false);
-    texto("Presiona flechas", 20, 60);
-}
-
-crearSprite("suelo", 0, 450, 800, 30, "#10b981");
-`,
-        assets: [], // {name, dataUrl}
-        author: "Anónimo",
-        plays: 0
-    };
-
-    let activeEngine = null;
-    let uploadedAssets = []; // {name, dataUrl}
-    const canvas = document.getElementById('gameCanvas');
-    const codeMirror = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
-        lineNumbers: true,
-        mode: "javascript",
-        theme: "dracula",
-        tabSize: 2
-    });
-    codeMirror.setValue(currentGame.code);
-
-    // Ejecutar juego desde el código actual
-    function runGame() {
-        if(activeEngine) {
-            activeEngine.stop();
-        }
-        const engine = new GameEngine(canvas);
-        activeEngine = engine;
-
-        // Registrar assets subidos
-        Promise.all(uploadedAssets.map(asset => engine.registerImage(asset.name, asset.dataUrl)))
-            .then(() => {
-                const code = codeMirror.getValue();
-                try {
-                    // Crear un contexto de funciones para el usuario
-                    const api = {
-                        crearSprite: engine.crearSprite.bind(engine),
-                        moverSprite: engine.moverSprite.bind(engine),
-                        aplicarFuerza: engine.aplicarFuerza.bind(engine),
-                        setPosicion: engine.setPosicion.bind(engine),
-                        setGravedad: engine.setGravedad.bind(engine),
-                        teclaPresionada: engine.teclaPresionada.bind(engine),
-                        sumarPuntos: engine.sumarPuntos.bind(engine),
-                        obtenerPuntos: engine.obtenerPuntos.bind(engine),
-                        detectarColision: engine.detectarColision.bind(engine),
-                        eliminarSprite: engine.eliminarSprite.bind(engine),
-                        texto: engine.texto.bind(engine),
-                        setFondo: engine.setFondo.bind(engine),
-                        setVariable: engine.setVariable.bind(engine),
-                        getVariable: engine.getVariable.bind(engine),
-                        cargarImagenSprite: engine.cargarImagenSprite.bind(engine),
-                    };
-                    // Evaluar código en un entorno controlado
-                    const funcBody = `return (function(api) { 
-                        const { crearSprite, moverSprite, aplicarFuerza, setPosicion, setGravedad, teclaPresionada, sumarPuntos, obtenerPuntos, detectarColision, eliminarSprite, texto, setFondo, setVariable, getVariable, cargarImagenSprite } = api;
-                        ${code}
-                        return { onUpdate: typeof onUpdate === 'function' ? onUpdate : null, onStart: typeof onStart === 'function' ? onStart : null };
-                    });`;
-                    const factory = new Function('api', funcBody);
-                    const gameScript = factory(api);
-                    engine.startLoop(gameScript.onUpdate, gameScript.onStart);
-                    document.getElementById('gameStatus').innerHTML = "🎮 Juego ejecutándose correctamente";
-                } catch(e) {
-                    console.error(e);
-                    document.getElementById('gameStatus').innerHTML = "❌ Error en código: " + e.message;
-                }
-            });
-    }
-
-    // Guardar borrador local
-    function saveDraft() {
-        currentGame.code = codeMirror.getValue();
-        currentGame.assets = uploadedAssets;
-        localStorage.setItem("gameforge_draft", JSON.stringify(currentGame));
-        document.getElementById('gameStatus').innerHTML = "💾 Borrador guardado en el navegador";
-    }
-
-    function loadDraft() {
-        let saved = localStorage.getItem("gameforge_draft");
-        if(saved) {
-            try {
-                let data = JSON.parse(saved);
-                currentGame = { ...currentGame, ...data };
-                codeMirror.setValue(currentGame.code);
-                uploadedAssets = currentGame.assets || [];
-                refreshGallery();
-                runGame();
-            } catch(e) {}
-        } else {
-            runGame();
-        }
-    }
-
-    // Publicar juego
-    function publishGame() {
-        currentGame.code = codeMirror.getValue();
-        currentGame.assets = uploadedAssets;
-        currentGame.author = "Creador_" + Math.floor(Math.random()*1000);
-        currentGame.plays = 0;
-        let games = JSON.parse(localStorage.getItem("published_games") || "[]");
-        let existing = games.find(g => g.id === currentGame.id);
-        if(existing) {
-            existing.code = currentGame.code;
-            existing.assets = currentGame.assets;
-            existing.title = currentGame.title;
-        } else {
-            games.push({ ...currentGame, title: "Juego " + (games.length+1), createdAt: Date.now() });
-        }
-        localStorage.setItem("published_games", JSON.stringify(games));
-        alert("✅ Juego publicado. Aparecerá en la lista de populares.");
-        refreshGamesList();
-    }
-
-    function refreshGamesList() {
-        let games = JSON.parse(localStorage.getItem("published_games") || "[]");
-        const container = document.getElementById("publishedGamesList");
-        if(games.length === 0) {
-            container.innerHTML = "<div style='color:#94a3b8;'>No hay juegos publicados. ¡Sé el primero!</div>";
-            return;
-        }
-        container.innerHTML = games.map(game => `
-            <div class="game-item" data-id="${game.id}">
-                <div>
-                    <div class="game-title">${game.title}</div>
-                    <div class="game-meta">👤 ${game.author} | 🎮 ${game.plays || 0} jugadas</div>
-                </div>
-                <button class="btn btn-primary play-game-btn" data-id="${game.id}" style="padding:4px 12px;">Jugar</button>
-            </div>
-        `).join('');
-        document.querySelectorAll('.play-game-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const id = btn.getAttribute('data-id');
-                loadPublishedGame(id);
-            });
-        });
-    }
-
-    function loadPublishedGame(gameId) {
-        let games = JSON.parse(localStorage.getItem("published_games") || "[]");
-        let game = games.find(g => g.id === gameId);
-        if(game) {
-            game.plays = (game.plays || 0) + 1;
-            localStorage.setItem("published_games", JSON.stringify(games));
-            codeMirror.setValue(game.code);
-            uploadedAssets = game.assets || [];
-            refreshGallery();
-            currentGame = { ...currentGame, id: game.id, code: game.code, assets: game.assets };
-            runGame();
-            alert("Cargado: " + game.title);
-        }
-    }
-
-    // IA generadora de código (simula un asistente inteligente)
-    function generateGameCode(promptText) {
-        const lower = promptText.toLowerCase();
-        if(lower.includes("plataforma") || lower.includes("saltar")) {
-            return `// Juego de plataformas generado por IA
-let jugador = crearSprite("player", 100, 350, 40, 40, "#f97316");
-setGravedad(0.7);
-crearSprite("suelo", 0, 450, 800, 30, "#a3e635");
-crearSprite("moneda", 400, 380, 20, 20, "#facc15");
-let monedasRecogidas = 0;
-
-function onUpdate(engine) {
-    if(teclaPresionada("ArrowRight")) moverSprite("player", 4, 0);
-    if(teclaPresionada("ArrowLeft")) moverSprite("player", -4, 0);
-    if(teclaPresionada("ArrowUp") && !engine.getVariable("enAire")) {
-        aplicarFuerza("player", 0, -8);
-        engine.setVariable("enAire", true);
-    }
-    if(detectarColision("player", "suelo")) engine.setVariable("enAire", false);
-    if(detectarColision("player", "moneda")) {
-        sumarPuntos(10);
-        eliminarSprite("moneda");
-        texto("+10", 200, 100);
-    }
-    texto("Recoge la moneda dorada", 20, 60);
-    texto("Puntos: " + obtenerPuntos(), 20, 90);
-}`;
-        } else if(lower.includes("shooter") || lower.includes("disparar")) {
-            return `// Space Shooter IA
-let nave = crearSprite("nave", 400, 400, 40, 40, "#06b6d4");
-let balas = [];
-
-function onUpdate(engine) {
-    if(teclaPresionada("ArrowLeft")) moverSprite("nave", -5, 0);
-    if(teclaPresionada("ArrowRight")) moverSprite("nave", 5, 0);
-    if(teclaPresionada(" ")) {
-        let b = crearSprite("bala"+engine.frame, nave.x+20, nave.y, 5, 10, "#facc15");
-        moverSprite(b, 0, -8);
-        balas.push(b);
-    }
-    texto("Space Shooter - Dispara con espacio", 20, 50);
-}`;
-        } else {
-            return `// Juego creado con IA: ${promptText.slice(0, 50)}
-let cubo = crearSprite("hero", 200, 300, 50, 50, "#c084fc");
-setGravedad(0.3);
-
-function onUpdate(engine) {
-    if(teclaPresionada("ArrowRight")) moverSprite("hero", 5, 0);
-    if(teclaPresionada("ArrowLeft")) moverSprite("hero", -5, 0);
-    if(teclaPresionada("ArrowUp") && !engine.getVariable("saltando")) {
-        aplicarFuerza("hero", 0, -6);
-        engine.setVariable("saltando", true);
-    }
-    if(detectarColision("hero", "suelo")) engine.setVariable("saltando", false);
-    texto("Movimiento con flechas", 20, 60);
-}
-crearSprite("suelo", 0, 450, 800, 30, "#6b7280");
+// ================= TODAS LAS KEYS =================
+const KEYS = `
+Satured-key-SuRP5ASSRec9hvCd
+Satured-key-V02kpm9yBzBQZATT
+Satured-key-m3G4N42Mno47hJ0c
+Satured-key-DZdYEsxz8XZxYKqG
+Satured-key-RvO3FdNSUPGrz2h2
+Satured-key-qhdCYufSPZYS3BKg
+Satured-key-KoK6z5HwPwJfC8Sb
+Satured-key-p06ZUwajjLPLOSHh
+Satured-key-xIOhuQDgaFxEzfoA
+Satured-key-7VK0Kgv3N77axiVW
+Satured-key-cXWtukRaN6dT9bqM
+Satured-key-YPuldAZhcDsEIt5u
+Satured-key-NWpf3VRhVPojgxpM
+Satured-key-6ck4OEZZOaM6gtI7
+Satured-key-YIz9XGktzg5EEkhJ
+Satured-key-fKWPfaflmRlsn5T4
+Satured-key-1zOU22NkkMzARLZT
+Satured-key-DzMv5sev0KRiiLKf
+Satured-key-8OPlkGKOjInPk8s8
+Satured-key-q6n2AZMqIYaJyufo
+Satured-key-gbpOCVSZh82QixXT
+Satured-key-WfJhvHg8OqHYvpXv
+Satured-key-2oBDFqRf4GmEsRYi
+Satured-key-SCPSdQer1X996FRy
+Satured-key-x44NP8NQCX6Lj8Hv
+Satured-key-8vaE3pKKAcBfZdmD
+Satured-key-GzPrNmUuwNAkAuwm
+Satured-key-4iZOAPc0eCZ2Xn5s
+Satured-key-ZwdH8zqnyav4u7Kg
+Satured-key-k4ywhmtcy4MCNCye
+Satured-key-PLHY4MIsM6ELZtYW
+Satured-key-nwOw8xBDucYcR20A
+Satured-key-dKCLSR4reyzQDq5J
+Satured-key-qYYBHPEuFmx7RMHo
+Satured-key-9h5liLucolq0ha6S
+Satured-key-dj2FnMsGpPhQAhYF
+Satured-key-xbPbD7aKsAbjS2gB
+Satured-key-Qxmv4EdqICCUF0ll
+Satured-key-H6WyBy8xKaztG4ss
+Satured-key-PEHTS4GGFdwMu61C
+Satured-key-u2LOgYm4DVMEsxFY
+Satured-key-WCoamor6ktuTmibv
+Satured-key-mT8iqbUnPACP3ban
+Satured-key-FdohoVpJKkS0xq6b
+Satured-key-BIN5GIqeoe7UvICA
+Satured-key-cSr79xCZvDw7lY0S
+Satured-key-yUSeJk5JiccrbR29
+Satured-key-UYrMYBa6rbDW77yi
+Satured-key-CRYf6DAjxr9XL2zL
+Satured-key-P5Gd7alp4VVFLPvP
+Satured-key-uaEOiYSN5JFpEvtM
+Satured-key-4JlGzcnWnjWNy5yV
+Satured-key-UOJ8KpsXneAKaUkH
+Satured-key-u7OpQOlinHosmNou
+Satured-key-xoqCICcGf43eln9c
+Satured-key-zPko1iDUgjf6bz4J
+Satured-key-UAA8sPBFzeUAWE3d
+Satured-key-T7rOj3SBmoqsZfs3
+Satured-key-xmPtAZdvRSoEByae
+Satured-key-aIJn57EXiRr7eMDC
+Satured-key-d0ZJihdojCSnRQPZ
+Satured-key-fUzuf3d1JmzpL83P
+Satured-key-haM80lLHnPJ56eJr
+Satured-key-9rGFKASiVH7xXXoJ
+Satured-key-Hb3jXYk5oe8KQM8L
+Satured-key-PuCgBsnfSrZgi5Px
+Satured-key-MkVtdwYB6gKEBHzJ
+Satured-key-tiHJyyBRZbasMgRr
+Satured-key-VFKrrpsBXVFFlpam
+Satured-key-pIKHirN3Osd2R6PL
+Satured-key-niDCaiNjcJZ8KlA4
+Satured-key-ORFUcz65pLo3HnrI
+Satured-key-6NNbxtgXHu97kQKq
+Satured-key-0XGaYSYa6XrsSNEl
+Satured-key-JytmnVBV8F8wW2BC
+Satured-key-KwB53AwGjgEJ7YXY
+Satured-key-GdLpTFSQVxWL5Md8
+Satured-key-PFwFzst4qicmLL9r
+Satured-key-ZagH8oDnZv1Cb8TG
+Satured-key-oenZBmiScJK85uU4
+Satured-key-JfHfRjuwHRNvF4SL
+Satured-key-y1dYJEW9KFsGI7yJ
+Satured-key-pOPsLAIb774tVWKW
+Satured-key-VGrB8iTR8U9augVD
+Satured-key-4qvSlpnTb5KjJM0M
+Satured-key-iRReiu7PvcOVHcYM
+Satured-key-sPNxvrNbh5RocK61
+Satured-key-38ZwVOFBVWvHv9Za
+Satured-key-aHUm9I2Tj5SgycLZ
+Satured-key-2ERgw9Ra4YhWow2y
+Satured-key-RdrXEAjf3SXtiCtR
+Satured-key-zXtnHeeQjgyU5bBM
+Satured-key-qkoSojdRoanQfSxR
+Satured-key-fS2zHFh7BQvVJcHF
+Satured-key-riLT2lXNmjqQOPFc
+Satured-key-DhwJBqtJD4i7qK3L
+Satured-key-kWnbmK805jYai2K9
+Satured-key-iEqyFLyrsVFZ77e5
+Satured-key-MaZuivmUzwIvWX47
+Satured-key-aAQB0jHrUO2ChlmS
+Satured-key-eRdaRlcxa5K572KO
+Satured-key-eYR3oyIQuwWHADPD
+Satured-key-KWQ2p9MFrru8Yp0N
+Satured-key-h1hTbPZo7jnxz3kh
+Satured-key-0j78kYnC3jnuyXdR
+Satured-key-k82rpEcQQ3yOJfkZ
+Satured-key-KWbsVZMJdFuYRKkx
+Satured-key-mieS5ND4Uu1oPJcZ
+Satured-key-F901mCLIO1w4Xhr0
+Satured-key-Lml2BBIFb85qsyOH
+Satured-key-ggdWue7TZepProMd
+Satured-key-KCFMkioNlikdIODS
+Satured-key-J8zdL2mmG2acB026
+Satured-key-VpSWzHOT5H9OSfAP
+Satured-key-t24KCdfFtyaHHoch
+Satured-key-oKPLv88QuEfv5ACe
+Satured-key-Ts61YLNMIQRJpJeB
+Satured-key-U0m27jsEdAnZMEQx
+Satured-key-oFMZzZskOtWrJy7T
+Satured-key-6GV0quUeDNrOTfpr
+Satured-key-2BtmfXUTml7OftUx
+Satured-key-mlSQhvZcNGhtiP1B
+Satured-key-vje4YLPzWpjMpLXy
+Satured-key-U33HM9vOjq66tsnv
+Satured-key-bSbjon60qNNAKXqB
+Satured-key-g7uzFazX3521Qo8C
+Satured-key-MdJR1Pi9dVS4txBt
+Satured-key-ZvaIfdMxAceBUsdB
+Satured-key-Hr5vRuej3b1KYSAC
+Satured-key-gAvMHbUHDc0CqMhR
+Satured-key-Xfag9wsHKhiOazaP
+Satured-key-Zw2RF2beD3LHN8Nz
+Satured-key-qBI7LKiiG19HBIxe
+Satured-key-z2iAsvmwCy1OqFjI
+Satured-key-lSvejduOs5jQT17y
+Satured-key-vkkby22DjynysgNd
+Satured-key-n8LGgSUEdRFgWZam
+Satured-key-leTghYhETUGBXgtk
+Satured-key-krJyZsbclOvpSQ8w
+Satured-key-Az2nepJbqN4YjRDG
+Satured-key-LUUliSO1YixCkOVD
+Satured-key-YqP7m4hEhcbxyT3x
+Satured-key-kG5bVn2t3RWibOud
+Satured-key-SRUHQUxwA8QBe414
+Satured-key-YgWQI2yHYH3fyzI5
+Satured-key-S8b2M41V72yNtlLP
+Satured-key-AU7CqgdTxSIAjXSZ
+Satured-key-JQ1RAD6BxTF6hwo8
+Satured-key-eayALayQD1oqXx3Z
+Satured-key-s83pq0aWCbIlZnAQ
+Satured-key-UCkxpGR7pfLczxVw
+Satured-key-jptPH7ZxmEPqmres
+Satured-key-CyYZrUb7ZXxvGGq7
+Satured-key-GNDJT3IEyftAZtUD
+Satured-key-2w2P9I5vNJwiYq0Y
+Satured-key-QadPd9SIgeoG86ZR
+Satured-key-DYCStq3FkYPDEcNL
+Satured-key-4KdwdD8FudqYGMsz
+Satured-key-il5Dr6xmiNfzC0hp
+Satured-key-FC6uEbsrOZ05hpnm
+Satured-key-xQ8pB4yRLUfM2fTl
+Satured-key-BRNQbZ5sw8Pj4MTr
+Satured-key-AQuoFrgSj33ph41p
+Satured-key-XxeZgZzmhol3owYF
+Satured-key-VSOFu8FwmjlS4i6v
+Satured-key-c7c2nZDyJ4tjwBE3
+Satured-key-rvCd1lph7ZwtsGbq
+Satured-key-7RovAFqvWQ81E4oD
+Satured-key-7OdyIbNv8NyiPk3Y
+Satured-key-cZ7TxUVENTz7u03i
+Satured-key-o7S3HyiKfrAXhueo
+Satured-key-3y5XeSc9diygWh4K
+Satured-key-00fR0QZ2R5TTfTNF
+Satured-key-CjNyqx6A75ZUmWTr
+Satured-key-VJWviELhKI8V8x3C
+Satured-key-FG6reHAfFysixwbn
+Satured-key-9s8QGCaqrCf0oayU
+Satured-key-Ic0mrT9ewilScXvF
+Satured-key-9cGNmdGglZN3z8gO
+Satured-key-6Wkmw7Qvx8x8mjA5
+Satured-key-W3wWivKEHhvmtXZa
+Satured-key-wzn30b8S9GXLlxCo
+Satured-key-t1UjipNPnI0W6j2u
+Satured-key-P7llU9Wp5JI3csCS
+Satured-key-VS72QRSrd7UsEl92
+Satured-key-E5DfDtDymlgpr4IN
+Satured-key-qGXZXDmX7k8nhrQl
+Satured-key-pzLhr58ctXfOrrdt
+Satured-key-MSN677oM8S7QZiC0
+Satured-key-XYMuLTAPfg7tyvKk
+Satured-key-6lyqKkb0St2aZW8o
+Satured-key-RRIWNMBvzvpOJlUt
+Satured-key-znnkfkzXS2IVZvzI
+Satured-key-B8SCPfLV3OiKkCu0
+Satured-key-zwngPUzAAqxyw1Aw
+Satured-key-gXitdAWT0nHTlfrG
+Satured-key-DsVRgpgRdJQdrNi1
+Satured-key-NrdZJoVM9RQlYPOA
+Satured-key-q7qSbdoP5Hb39iOH
+Satured-key-L2lwTD9O63jt4e4t
+Satured-key-1GUDMUkXSTcZeWj5
+Satured-key-7HxwEXbLAEeyz8f3
+Satured-key-OV3kwCql7lEjmBvK
+Satured-key-o8c27qmzQViy99ah
+Satured-key-pG9W44GQ4IlE2YoY
+Satured-key-RuPL1mTGaGnDCdhm
+Satured-key-Oyb8atpO6BKvznkP
+Satured-key-lxxIj58e2u2UPG4Y
+Satured-key-X2T3ldUEUwBacEqK
+Satured-key-Cy5wnmlkkq90eKDV
+Satured-key-ohhWp3T9mTn1WwHs
+Satured-key-FaO2ctA8p39lMHYA
+Satured-key-hMfLa3DnzeF7A1cM
+Satured-key-Qvh7Z8f6KN4GTBrs
+Satured-key-pRrwiS6St65tUOTt
+Satured-key-kmFIryr4zIylk6a4
+Satured-key-OPsONtCsY5hNa9tc
+Satured-key-KItg6bpbd2r0yz3L
+Satured-key-v6FUP9CXtA7S3Xkw
+Satured-key-8bpzhnpEurePRo1N
+Satured-key-KKm4djN5hVUsexEn
+Satured-key-1X0MXRcz2kFSgY4z
+Satured-key-gOa4g10qy4YmSqlu
+Satured-key-Kxs9aUbMg4Y656oU
+Satured-key-FQxEbR8eYolU62Jp
+Satured-key-IFbitaZG2uaLmtEF
+Satured-key-HYUs2UTNUQujfAsF
+Satured-key-Zs1YP8B9t5uytOYt
+Satured-key-IcDPoqq5kWO82tmM
+Satured-key-DvFoE8H03pqr6djz
+Satured-key-JDvbC181oE5vMo5x
+Satured-key-ltOUQST5NlHO2VAu
+Satured-key-bLJ2aVnIkTV2lJ54
+Satured-key-Mo2hQ55vOWTaHWuw
+Satured-key-OwEAVpOmYCg3fQyQ
+Satured-key-ON50bcaYFM3DJVTQ
+Satured-key-tzB3UaWjyYTOKEwc
+Satured-key-x9bG9Mq57wUHNK0t
+Satured-key-wY3cjlug779MytcG
+Satured-key-umeAxM2y03h6Ycq4
+Satured-key-PqHz0gIixSOIYGbl
+Satured-key-4fSgElgoZltB8H1f
+Satured-key-WeiJKGdvgM6M2Mz7
+Satured-key-GjFw2WjZAoLsBzTG
+Satured-key-N4X7TaRLvnU8Spvt
+Satured-key-v1CqbSbeJddaRjm1
+Satured-key-lsijT8IaDRmc5dTC
+Satured-key-8IZsYSGRCJjiN25y
+Satured-key-SFeqg8xiuPf7Dynh
+Satured-key-fkeaCku2X4gI77de
+Satured-key-y4Vx1WH8GCZgRxX1
+Satured-key-7ob4BXFGOTj2zr4R
+Satured-key-n6lzHk2HVS6lC3L6
+Satured-key-q85cibkpRsOg9gwp
+Satured-key-UDkF3b38xjx24Xra
+Satured-key-GRkz3GUVKeGupntD
+Satured-key-QxqjedPGmFywV1ME
+Satured-key-WWqxhloitPjsdZNn
+Satured-key-YR2LJDFHWMQA7zwP
+Satured-key-gqM2YH0b1Ej8ISOl
+Satured-key-QEuyvFUrqSogo23d
+Satured-key-XnuL3HArhUKFiGsD
+Satured-key-3CT6Nsaku59Vohe6
+Satured-key-crCGb44ZHtGIRrH3
+Satured-key-x20M429PRVBl2ubi
+Satured-key-c9Jltb2OlWrmgSlG
+Satured-key-W8aWBz2KzioQi9wm
+Satured-key-CkudY6PLpaYeH7im
+Satured-key-hZQv6DKmF5oU4IAO
+Satured-key-aQExdnmInjkXkSmg
+Satured-key-h0n3oj8omZQ8q3ag
+Satured-key-uIBCYDmpwXs4TaTv
+Satured-key-tPkAIMhTwFo6wE3I
+Satured-key-Jnw39eZ9X3VU9bC4
+Satured-key-D5MCW98QuxKxEsG2
+Satured-key-Xd1ls4EzQw58ZwPf
+Satured-key-Zpubzst41jgpPIvV
+Satured-key-01LeUFkNePKYSpMu
+Satured-key-uVqRindHrduuK7BF
+Satured-key-CpH6T18SCt1lhOqR
+Satured-key-UeSNh5eLvJRjAafQ
+Satured-key-MVfQDk96QztNZSb8
+Satured-key-W2UJNJVbsDQGeSj8
+Satured-key-R0daPVhXz3E91y0K
+Satured-key-t8e3bCzeTeyPHwC9
+Satured-key-5RaTbUMOOpJEihOr
+Satured-key-vUqPWcn3lRpqwyMv
+Satured-key-3KVUH9nMrZPooTqk
+Satured-key-J3hE0JE4jjPvbvvf
+Satured-key-dZWP4jKdXERW1GKe
+Satured-key-9Ff3DYzRROm884SU
+Satured-key-H4JURfCXGHrk6xQL
+Satured-key-gyqUD7EoUUQ8pPs3
+Satured-key-LsLAqaf1nE5C3nSY
+Satured-key-90DIgo5rgZZ1WQmk
+Satured-key-URjtb7w16zMaUA8c
+Satured-key-xIkvEKrnL013gJ6B
+Satured-key-wzdlaxPyC9xJ1z4j
+Satured-key-9YiScHhex71M5FoA
+Satured-key-oGt3m0oksfOTQ5hz
+Satured-key-TVoE0EsNyz2U7pcZ
+Satured-key-i48S0Dw1TrOwSz4x
+Satured-key-HIOh00bHpvWKZYfp
+Satured-key-L56epdBFZL6CvYMM
+Satured-key-9mDU5bvFufhOa0nJ
+Satured-key-VkzlmvwQiCfO4AC0
+Satured-key-HOrCH6emWOF9lW4H
+Satured-key-u7ajMAo2d9tpIzUE
+Satured-key-AgpuQGDnECwLVMA6
+Satured-key-pi8Qt1jOyfNxSD6A
+Satured-key-EyKvC5lax7gsnfdF
+Satured-key-VQH8wUorRSpUpLg3
+Satured-key-eTlk15yvAQhIGY03
+Satured-key-byxKSah25GaD5Nhg
+Satured-key-qeH4YWczfW8zzqKB
+Satured-key-xGWOdiKfYAX0lS2U
+Satured-key-yJKKDGvy1LHZcKEv
+Satured-key-XOCGkNnVdPq6hoXX
+Satured-key-mtkuMeXvwOxsQrEN
+Satured-key-vzGrmX4y71Bunpvb
+Satured-key-N7VbmQuc747KywSM
+Satured-key-jQTFyau5BYThkpKF
+Satured-key-zIB3a5EgbXDkdaRs
+Satured-key-Vt4j8h2cTjtEV4QF
+Satured-key-5ktvCi52WGTxU5DU
+Satured-key-PU802ihKhQXjl5O5
+Satured-key-V0IvMut1JCIkx7vh
+Satured-key-pNFUMm8tx5tRndKT
+Satured-key-vqAapSQcs0lsPhGu
+Satured-key-YMngEw8fJQBBxl7w
+Satured-key-AkgSxXVjF6DVXR8Z
+Satured-key-XKSLCYgCHMLcdsyW
+Satured-key-qfLJlmGniIJWkQyF
+Satured-key-9mgTZiVWKq8Xh3bx
+Satured-key-LR6yuJwkfNgVjajz
+Satured-key-vHLVm6a1ND4XdKKQ
+Satured-key-0CdrjQxGRCxgMNF9
+Satured-key-ZVqYt8citQWJ28vA
+Satured-key-RAcMC40iG65F2i7G
+Satured-key-vqJRgDzpYrxR9CO3
+Satured-key-JkPiLDMvLIsFLKbt
+Satured-key-G72lPwEbJ1sbLDdp
+Satured-key-yJ4UIR814UWEmm2p
+Satured-key-DLcaQcdM5GFDHs2C
+Satured-key-1vxOBkutM0aEiSW4
+Satured-key-C3uLKllXhtPIDBfP
+Satured-key-UsMiN0aCFJBVZUp9
+Satured-key-B8h8cz0KttE0UTNQ
+Satured-key-hwqEgAGQNynLTWzt
+Satured-key-OiqCIRJZ45flPqsl
+Satured-key-OqSUBkQOM7twU021
+Satured-key-DwAIJHTNqW1FksSn
+Satured-key-g3a3G6WVsihvIBcn
+Satured-key-4i3qUrrZUNGuEcVx
+Satured-key-P6DpsV1CSjK6EKNo
+Satured-key-gN3QXlGELzhoF4mZ
+Satured-key-CFCuJeVF6IdxRjLJ
+Satured-key-MYI2ORqSGkZY7txP
+Satured-key-PX6oLdo7eQmU8MP7
+Satured-key-XQav8VU1go14vNfN
+Satured-key-OtPN2ki5nZDzWz64
+Satured-key-Jb3JSAwfURD8c7Yf
+Satured-key-uaNJ7OSbApvue5oA
+Satured-key-SfJZJcBMVmme5Yiz
+Satured-key-gthFjt2DFIUI8GkL
+Satured-key-cC8YTEReawefr5Ur
+Satured-key-yzSJFZaSg1v2AZ3v
+Satured-key-LTLJbd0pYnTF6ab5
+Satured-key-1GKOB5jZsMzJrozy
+Satured-key-T3hVMnF7FK40TZ2d
+Satured-key-DNANp18SFiead9yY
+Satured-key-x6PtTE5aakcYXocU
+Satured-key-APmtiF3lSFx1YCWZ
+Satured-key-eCGLIKcSJXQ0HgDv
+Satured-key-AlPeINPE09y9VDxZ
+Satured-key-xuyT9W1Ha88T6ReI
+Satured-key-AnjtQK8UzeoJ6z7k
+Satured-key-mW728Gm18vxQ7cdN
+Satured-key-o8ZglHHEdIZ16O7X
+Satured-key-bT4eiwKr6ZZzdI3t
+Satured-key-rbhLB5TexSmQSv5N
+Satured-key-oGwhzwBs3dEeb8f7
+Satured-key-JfVmCqPwVnVfmIWq
+Satured-key-lTY2Or6gbJMmHkii
+Satured-key-fI9plr2g9jO9IFox
+Satured-key-im4RaxXa90KoIU8W
+Satured-key-oruMz8QkTaaeSW1t
+Satured-key-8hjIFmYgz3haYYsp
+Satured-key-PmgT8SomSIRxjYZD
+Satured-key-AajaRe2lEIAVGoeW
+Satured-key-1HHnBnQ3zrsSIxMR
+Satured-key-kraqux5Dt1ZaND3V
+Satured-key-iMJzrfvFfuCnx8BS
+Satured-key-h3A2myAilI6TYIen
+Satured-key-12u5lFFD8Bwt0Oc9
+Satured-key-nzJrnVHkDvVQp8s3
+Satured-key-bEU27CQOn7DvCzNV
+Satured-key-rGAcLQUGPJqhErEm
+Satured-key-sDwZbunAkucfPPii
+Satured-key-xmSniyzFduTKa5kU
+Satured-key-JspwPXzXGF1ENJ0Y
+Satured-key-YOhdeU8ohuGXeOtt
+Satured-key-Yv9UTfzfMYTvYYJO
+Satured-key-2vNALus0EL930Vnu
+Satured-key-Pdrx36E5YVXFTn8X
+Satured-key-4qHIt4w6eK3WVpTy
+Satured-key-tAkHlzR7sn3qTHqi
+Satured-key-YlJbdzJTGg3QY1Ex
+Satured-key-Di4eHTXhNTASHhKy
+Satured-key-X65npUUS0p3IkR5o
+Satured-key-3tdoWHfTf34vot8N
+Satured-key-xAaxxnjdcvMFEDDZ
+Satured-key-De0keq8FbYpeLGdH
+Satured-key-JSUd9NyX4afqMakr
+Satured-key-x3vNQpRtTFosGg1v
+Satured-key-JaeEeHEeKRFX8Qso
+Satured-key-RnxijAqn9faQHDp9
+Satured-key-YaWVr6NjBtBZmXPv
+Satured-key-D6tILfXrfEKOfLdr
+Satured-key-mXbeRsjJXYsOGbp4
+Satured-key-PWPtYTMgi7GE5k9Q
+Satured-key-5nTavaYbVhHT0qQh
+Satured-key-CA9UW6x6ZGvluw9s
+Satured-key-iU6q9eIoPmEcpKxR
+Satured-key-6XRALwVAHlpvjx1i
+Satured-key-TIK4tawmI80fvfJZ
+Satured-key-uy7Gpxe6mtwRGItu
+Satured-key-uvyoDz0LdLm1HZNd
+Satured-key-rgs2CzE2boMMT0Z8
+Satured-key-3fTYsYQN26AWrSRi
+Satured-key-xYA4xtYGVuM5jF4A
+Satured-key-yAiS9cJpyx278JGm
+Satured-key-ilACNtUed3lyjLXd
+Satured-key-NaridzXHkbuuMXN4
+Satured-key-RQVy7SKRLCyvp5mx
+Satured-key-ZqiP0iPd6tzWBGFk
+Satured-key-4v99NvPwQIN5jOq1
+Satured-key-Hzxozx1iaQiIJv6B
+Satured-key-nUuKRQse1HVoLp5p
+Satured-key-fc0Tq98ItsEqU6Xt
+Satured-key-1wCDWjKxznZNk1B9
+Satured-key-7PzzUxHAwaiXKLn3
+Satured-key-kIbo2uZP1hSay9oW
+Satured-key-fDA93Y3LnNyFKd6u
+Satured-key-ngdnvnCqM4eEEygO
+Satured-key-jbeSgRjdQHnWx9xJ
+Satured-key-LNk0zyy69qzJChkJ
+Satured-key-MwnigvC8sVLTXd2H
+Satured-key-FL4dX3OcfUJz7Czz
+Satured-key-oT6qUUdYDPFzSeM2
+Satured-key-MBx8LxEhWdcKX24F
+Satured-key-2M5cOaNfnM2iagMH
+Satured-key-sxjYf0GUkw02Hj0h
+Satured-key-Zzhtyh9tBNFCZ6GZ
+Satured-key-gCq6aYR3cToVSsP0
+Satured-key-r40fX81Od6zQCfz2
+Satured-key-Tax3orqgM85dd0WR
+Satured-key-hoXrjeJZeYYXRws9
+Satured-key-6WZMA0CO1lFUjzpL
+Satured-key-kgSXhWLhXHeWwMA2
+Satured-key-nXc8ZRnQS5CiBFlU
+Satured-key-eXIswpyVsEjDrx8l
+Satured-key-x7fCUGnmFscNhz5j
+Satured-key-E7I9gBCLp9MxD91v
+Satured-key-ZW5VIdPNH3T57ipK
+Satured-key-DxFld0a8IQz526t1
+Satured-key-NkUlPkILWAX7cuTT
+Satured-key-vyt1vUUGjkG6xE3j
+Satured-key-8QKRe9AMXKxbbPkX
+Satured-key-XyXAVAipeENt3dp6
+Satured-key-ytJMmmunByyQsoik
+Satured-key-kUPeexNqZEX2PgH0
+Satured-key-EyrBWYOykdTmDtn1
+Satured-key-emSOt5sx8VVBhtlf
+Satured-key-CZye3QbJHNgtayBp
+Satured-key-39YjTIxGvttD3122
+Satured-key-DcF88x9aDovEE8Gt
+Satured-key-DcoY9paKRfjmynUP
+Satured-key-GYw2aCRQS70qSOsy
+Satured-key-72fDprLZ8i2Cu2L6
+Satured-key-XuVbjytK8Gn0lIhl
+Satured-key-kQiyhDIZ17hPxdHW
+Satured-key-HWSBlhZxnlmzWkSz
+Satured-key-4JgdJ9JG628MLObm
+Satured-key-pX8V7hAXel0wfBz2
+Satured-key-c72xgNZrtyOfIehM
+Satured-key-2ZOn89bazVXXvh1W
+Satured-key-On1HaeIQXhEfSbU2
+Satured-key-PKbPsrrf3rjBXXzw
+Satured-key-1bots0L7rPNLc1Dq
+Satured-key-Y6TZ8VP0KkrYEyc5
+Satured-key-Osza7MkNsAZraESA
+Satured-key-o6THwYgIjl29nllW
+Satured-key-ahZ9JseCPG5okHzU
+Satured-key-85G3eDmmxIq1xCPt
+Satured-key-x90B18u0maPPBfA7
+Satured-key-0oJIx3Wq0ISLwqAk
+Satured-key-uKtkTNxhkF7kAHQc
+Satured-key-xbwzLRBt2jz7aH11
+Satured-key-E5BayqsEk5T6b0HU
+Satured-key-mZFsoFm8dDFxKngz
+Satured-key-2tMxYOUPAjKs9WMg
+Satured-key-BUqTyghOYPIosbd9
+Satured-key-Br3itpF4xuFR9lsZ
+Satured-key-vhcfsSjDBIENQ3vy
+Satured-key-oJdyiJgU9ZOk3N7e
+Satured-key-Gr8hdei4N9igGvyG
+Satured-key-APVKG8Im1D48UP4Y
+Satured-key-CirtMZeIteAGP2e8
+Satured-key-jGDgQBKqzvd9WOHp
+Satured-key-TBM2uXL1mkSP8jHT
+Satured-key-eMPU3OHSMsYHB6vk
+Satured-key-TFi3hpzWGVZHmNhg
+Satured-key-fQRjqwvDjmLDKZcS
+Satured-key-8aHFfA9Mdd8RUVHM
+Satured-key-8ZK8oCzV9XMup26p
+Satured-key-RgElIUpeUhxxKPq0
+Satured-key-Z5YVKyREOCq66Ynw
+Satured-key-QzhfiEqAVipXcPzG
+Satured-key-BpGVCzCg9mS1x5uh
+Satured-key-NDqmxtYrXkcrmujx
+Satured-key-Xwip5jdM8ZGXtfn5
+Satured-key-pKR696jVGBUjVKEk
+Satured-key-8g9yQRVHk5T8Syg2
+Satured-key-S1XKToUTqU4DUvlL
+Satured-key-xNd5GqYTrAjIlXNc
+Satured-key-A2bq0PQ1NYVh6nwq
+Satured-key-8WWdimVYOXIOVEll
+Satured-key-uoPOeXFxWKsLAuWZ
+Satured-key-gavs7TbAOzgNaPaW
+Satured-key-8t7Zf20wBXO7ogSm
+Satured-key-jTcCxwiAVjT8AhAi
+Satured-key-VhDtyTHCdKw2f5vO
+Satured-key-i7e4S1yUImaZS0YX
+Satured-key-h9tlhSKhVhVH0CCR
+Satured-key-vxdJ64BTsZEiC7dz
+Satured-key-ObxQQTl5qPmL5Nwa
+Satured-key-vw6Kk0V1m0coi0yS
+Satured-key-iReW9iTiFm7HioL2
+Satured-key-AOYReG81s8s1P7ZB
+Satured-key-s2iEGXiRMvusn7aN
+Satured-key-y6AjZdZPxGAQdnvC
+Satured-key-Jb86I5a68uTynThH
+Satured-key-CgcCP64cXFScCcRa
+Satured-key-RASHUh3raSwyG0iE
+Satured-key-7FuexUsgNcKhh4xM
+Satured-key-OFdN9wONJkKmRiyO
+Satured-key-9rSbjR9gnidBOaHb
+Satured-key-G3Ml7WSX6NUh06L0
+Satured-key-I26kYtEuOMFSO5PY
+Satured-key-sj2YwvA48OmYIAqm
+Satured-key-Lsn0Z3mRIieqdN55
+Satured-key-ZIlBkpSx5bgZ4bgv
+Satured-key-jvk3gowQgaWz9KGC
+Satured-key-WAiO6JZD7Xpy0MBq
+Satured-key-qqiDjEzMs4srOjyK
+Satured-key-I0mvXZ0oaGjGtyV8
+Satured-key-fbAXvuZb0RYAfIlI
+Satured-key-jbGfH2is8f0dr4Yx
+Satured-key-7L8WhShOUDsmu0Sx
+Satured-key-Zkj7otdfbUREuU2q
+Satured-key-iBEWxoczkzojbfr2
+Satured-key-I4zJ6j2b6OI5kupg
+Satured-key-1Uz0MiuQ0UdvaeAY
+Satured-key-74M68EjVp5uC9YGX
+Satured-key-IzFu8M87AqBhJy2Q
+Satured-key-jdN2fCOq8E8qgkaH
+Satured-key-T9IyE6lYQORDtaDk
+Satured-key-pZO8ZdqpYHNUIz7i
+Satured-key-2h1uV5VlDSpu4wo8
+Satured-key-TUshmzuZPyrudPCl
+Satured-key-hDJeZI166Uz2RcYq
+Satured-key-VZVIjsqXW48Rxeot
+Satured-key-fNYpiMDiKTMkMEtd
+Satured-key-y6NhtOVA3peNDHTV
+Satured-key-nR7F9XXR0Tj7m8ys
+Satured-key-OJaEVGONRyTN8odk
+Satured-key-lSStH0w8cEGYzToi
+Satured-key-7WWQWF82kdQMYQIh
+Satured-key-aAQAemEgxKUEJApS
+Satured-key-RUBQhap6p49WxDAl
+Satured-key-IBy88YkakKloFDnq
+Satured-key-ByQNcgN4MPSHZzyc
+Satured-key-2xtKY4oAVAc368fT
+Satured-key-MjUBul2mmNCgGnFi
+Satured-key-ATC7vRSIKDK5goAl
+Satured-key-gY18Fin0qaeBUmCP
+Satured-key-ZgGOkUkvAkhacKUy
+Satured-key-ucCfvRnBkXnoc5Za
+Satured-key-8pVDvwfODqLFliuM
+Satured-key-kmWKph2m6VZ2zjVm
+Satured-key-se1XIea3PwX8OpN5
+Satured-key-MHS15orppGhdep1A
+Satured-key-T9MRddTC3l0zf9ji
+Satured-key-Cp9rtGMxKgkaf5mu
+Satured-key-rcyjiLDrBLOn9mm2
+Satured-key-mZekRlQW9RfJh1BB
+Satured-key-lsXWmNCrqKiMOVWp
+Satured-key-etOZxiSe0fxdyLmE
+Satured-key-hzeyOwD2xN4YxYsQ
+Satured-key-7F791Qa8xJkP9BIe
+Satured-key-bdZNcg5ROP87Pt2e
+Satured-key-PYN7EmYovY7HF3Wi
+Satured-key-ddlubKRoHDD2lGtJ
+Satured-key-GOPtAKOqw7m7M6hX
+Satured-key-sgBhm3SWXp3t1EyX
+Satured-key-puJFFaixv3XyIeVA
+Satured-key-a9SOKpaDPgxWRgeE
+Satured-key-prbxARrrTqVoCjAW
+Satured-key-r4daDijMUTEZf3gN
+Satured-key-oEcwYnW2ymUl9qS4
+Satured-key-7wd6zRAvEnlpzCQy
+Satured-key-WPzDjJVZKHN6DBno
+Satured-key-zkTIhgTrHRZXDFOm
+Satured-key-7cuBGmKIPwnhmwO9
+Satured-key-bjxoZLbI2usFca0X
+Satured-key-yxJcBTnFV1zJwoDL
+Satured-key-tNUaboIDy84mrY1c
+Satured-key-rLpnpcsaYcu90kYi
+Satured-key-3PKM00y66D3iol3E
+Satured-key-tLx3LSFEvRHtM0HZ
+Satured-key-WvFm2O96Ox0iZyVV
+Satured-key-jBVmO4hkb4DVngyN
+Satured-key-MXBlTYyb3ML0yJPZ
+Satured-key-jT0sO33cNcClrIoR
+Satured-key-JNZkXCtFKf5LU1Zx
+Satured-key-yW0JAkHg4Zhqdh8X
+Satured-key-jSd2Eh5pOAkiRzEh
+Satured-key-e5jbhcjDJe9tZtaj
+Satured-key-LIi4j0GfBGLdGMUh
+Satured-key-GsFdjVSg2VAsqDs8
+Satured-key-ecBisbtXMhwLamgc
+Satured-key-pIaB01fv57ehVBAl
+Satured-key-MWBcScXZoIQ2n89n
+Satured-key-vcEan57ljyQaVvYh
+Satured-key-rr1oP5QqV7XF0td4
+Satured-key-bJadBRmhajbwzXzP
+Satured-key-B63WaEshkWNVwniQ
+Satured-key-Q6ASxowEstFAF9uy
+Satured-key-NynxsHW2Aamu0X6b
+Satured-key-Av7vqgtBtToJY11d
+Satured-key-qYtEDSmHM27Q7Fq2
+Satured-key-IVLvpbKBIXbwPzJ1
+Satured-key-GXVV4FkQz18LdrEX
+Satured-key-1nmE9HRYllEgw1hI
+Satured-key-TXqYDkYE40pqZrA5
+Satured-key-SsyaRWwEmCRR2p5p
+Satured-key-r16sTJTFSh2KJkTB
+Satured-key-QFxVtB1yxIhGUVu8
+Satured-key-EPWetv0eJvEKQyf1
+Satured-key-8li9TQunoxebFwwd
+Satured-key-8j8OtTkoXdLMv2r6
+Satured-key-TaNwWsZYLPFsA08h
+Satured-key-FB5NiJkZuItVaRoV
+Satured-key-Kf9HNrZ2l9ax08IU
+Satured-key-TkT0G61wYwWPdCkk
+Satured-key-o9sfNnZq3oCEW7Pj
+Satured-key-UEsqewm1krlYk0OO
+Satured-key-wpnz48VqhJNHZT7V
+Satured-key-DKTbh4Vvw0IZudDU
+Satured-key-FAsLIb23lbt0KE9E
+Satured-key-GBj4Lekpgx3NcSXG
+Satured-key-nd3dez0nzZad2ndO
+Satured-key-bdZeNZT0OIyxBdGw
+Satured-key-ocb5OvlCSBbBWuZX
+Satured-key-0bbEO4lA08fweuw3
+Satured-key-5ekf4tLWootuWxip
+Satured-key-rjL9kVNxiYoeDOF3
+Satured-key-s37OoEgoaYcsfTz7
+Satured-key-qCoGlEkooDMPrKxy
+Satured-key-jwd0M5D40rFWxnSp
+Satured-key-Xsxx5eQ3FHP16jXo
+Satured-key-RSqcj4RYZOquYfdy
+Satured-key-1hMbwfbUZoC4ESVK
+Satured-key-1ajp760mHwl8i4Nx
+Satured-key-IHe1HFTX31Dn1oGI
+Satured-key-3vG6ynjTlS7DiE7q
+Satured-key-4okAb6S9OgWjh9hO
+Satured-key-Zn8h1BbmgwtoLjW5
+Satured-key-smqoF3gxSX4ASgG3
+Satured-key-2o3Aqyh38RAqRk4b
+Satured-key-MrlJKyA1i8Kh7fSm
+Satured-key-qgApw5A1mVIzDgsD
+Satured-key-sQp1nwp9Yi4oKVD3
+Satured-key-NTgKccOme6E2iS6j
+Satured-key-UQRtrPdBMGpvPe0o
+Satured-key-8a5cTmJCoKzE2eu8
+Satured-key-jGvQRZyoVGVyYNje
+Satured-key-S71gxRJyJBgUe7l6
+Satured-key-n6UCAQc
 `;
+
+const KEY_LIST = KEYS.split("\n").map(k => k.trim()).filter(k => k);
+
+// ================= CONFIG =================
+const DAY = 24 * 60 * 60 * 1000;
+const LAST_CLONE_KEY = "lastSaturedCloneID";
+
+// ================= FUNCIONES =================
+function generateID() {
+    return crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+}
+
+function getID() {
+    return new URLSearchParams(location.search).get("id");
+}
+
+// ================= LÓGICA PRINCIPAL =================
+let id = getID();
+
+if (!id) {
+    const lastID = localStorage.getItem(LAST_CLONE_KEY);
+    
+    if (lastID) {
+        const stored = localStorage.getItem("clone_" + lastID);
+        if (stored) {
+            const data = JSON.parse(stored);
+            const remaining = (data.created + DAY) - Date.now();
+            if (remaining > 0) {
+                location.replace("?id=" + lastID);
+                return;
+            }
         }
     }
 
-    // Eventos UI
-    document.getElementById('runBtn').addEventListener('click', runGame);
-    document.getElementById('saveGameBtn').addEventListener('click', saveDraft);
-    document.getElementById('publishBtn').addEventListener('click', publishGame);
-    document.getElementById('refreshGames').addEventListener('click', refreshGamesList);
-    document.getElementById('newGameBtn').addEventListener('click', () => {
-        if(confirm("Nuevo juego: se perderán cambios no guardados")) {
-            codeMirror.setValue(`// Crea tu propio juego
-let jugador = crearSprite("player", 200, 300, 40, 40, "#3b82f6");
-function onUpdate() {
-    if(teclaPresionada("ArrowRight")) moverSprite("player", 3, 0);
-    if(teclaPresionada("ArrowLeft")) moverSprite("player", -3, 0);
-    texto("¡Hola! Usa IA para más ideas", 20, 50);
-}`);
-            uploadedAssets = [];
-            refreshGallery();
-            runGame();
-        }
-    });
-    document.getElementById('generateCodeBtn').addEventListener('click', () => {
-        let prompt = document.getElementById('aiPrompt').value;
-        if(!prompt.trim()) prompt = "juego simple con movimiento";
-        let newCode = generateGameCode(prompt);
-        codeMirror.setValue(newCode);
-        document.getElementById('aiMessage').innerHTML = "✅ IA generó el código y lo insertó. Presiona 'Ejecutar Juego' para probarlo.";
-        runGame();
-    });
+    const newID = generateID();
+    const key = KEY_LIST[Math.floor(Math.random() * KEY_LIST.length)];
 
-    // Subida de imágenes
-    const imageInput = document.getElementById('imageUpload');
-    const gallery = document.getElementById('gallery');
-    function refreshGallery() {
-        gallery.innerHTML = "";
-        uploadedAssets.forEach(asset => {
-            let img = document.createElement('img');
-            img.src = asset.dataUrl;
-            img.className = "img-thumb";
-            gallery.appendChild(img);
-        });
+    localStorage.setItem("clone_" + newID, JSON.stringify({
+        key: key,
+        created: Date.now()
+    }));
+
+    localStorage.setItem(LAST_CLONE_KEY, newID);
+    location.replace("?id=" + newID);
+
+} else {
+    const stored = localStorage.getItem("clone_" + id);
+
+    if (!stored) {
+        document.getElementById("loading").innerText = "Clon inválido";
+    } else {
+        const data = JSON.parse(stored);
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("app").style.display = "flex";
+
+        document.getElementById("keyField").value = data.key;
+
+        function updateTimer() {
+            const remaining = (data.created + DAY) - Date.now();
+            if (remaining <= 0) {
+                document.getElementById("timer").innerText = "Expired - visita la página principal para nueva key";
+                return;
+            }
+            const h = Math.floor(remaining / 3600000);
+            const m = Math.floor((remaining % 3600000) / 60000);
+            const s = Math.floor((remaining % 60000) / 1000);
+            document.getElementById("timer").innerText = `Reset en: ${h}h ${m}m ${s}s`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
     }
-    imageInput.addEventListener('change', (e) => {
-        for(let file of e.target.files) {
-            let reader = new FileReader();
-            reader.onload = (ev) => {
-                uploadedAssets.push({ name: file.name, dataUrl: ev.target.result });
-                refreshGallery();
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-    document.getElementById('clearAssets').addEventListener('click', () => {
-        uploadedAssets = [];
-        refreshGallery();
-    });
+}
 
-    // Tabs
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            let target = tab.getAttribute('data-tab');
-            document.querySelectorAll('.pane').forEach(p => p.classList.remove('active-pane'));
-            document.getElementById(target+'Pane').classList.add('active-pane');
-        });
-    });
-
-    // Idioma simple
-    document.getElementById('langSelect').addEventListener('change', (e) => {
-        if(e.target.value === 'es') alert("Idioma cambiado a Español (interfaz en español)");
-        else alert("Language changed to English");
-    });
-
-    // Inicializar
-    loadDraft();
-    refreshGamesList();
+function copyKey() {
+    navigator.clipboard.writeText(document.getElementById("keyField").value);
+}
 </script>
 </body>
 </html>
