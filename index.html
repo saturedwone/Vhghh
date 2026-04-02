@@ -3,50 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delta Pro Deobfuscator | Advanced Engine</title>
+    <title>Delta Deobfuscator | Ultra Engine V3</title>
     <style>
-        /* =========================================
-           VARIABLES & RESET
-           ========================================= */
         :root {
-            --bg-base: #09090b;
-            --bg-panel: #18181b;
-            --bg-surface: #27272a;
-            --primary: #8b5cf6;
-            --primary-glow: rgba(139, 92, 246, 0.4);
-            --secondary: #3b82f6;
-            --accent: #10b981;
+            --bg-base: #050507;
+            --bg-panel: #111114;
+            --bg-surface: #1c1c21;
+            --primary: #a855f7;
+            --primary-glow: rgba(168, 85, 247, 0.4);
+            --accent: #22c55e;
             --danger: #ef4444;
-            --text-main: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --border: #3f3f46;
+            --text-main: #fafafa;
+            --text-muted: #71717a;
+            --border: #27272a;
             --font-mono: 'Fira Code', 'Consolas', monospace;
-            --font-sans: 'Inter', system-ui, sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             background-color: var(--bg-base);
             color: var(--text-main);
-            font-family: var(--font-sans);
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* Barra de desplazamiento personalizada */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-base); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-        /* =========================================
-           LAYOUT PRINCIPAL
-           ========================================= */
+        /* Navbar */
         .navbar {
-            height: 60px;
+            height: 50px;
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -55,630 +41,267 @@
             justify-content: space-between;
         }
 
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-main);
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
+        .navbar h1 { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); }
 
-        .navbar-brand span { color: var(--primary); }
-
-        .main-container {
+        /* Main Layout */
+        .container {
             display: flex;
             flex: 1;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 50px);
         }
 
+        /* Sidebar Controls */
         .sidebar {
-            width: 250px;
+            width: 280px;
             background: var(--bg-panel);
             border-right: 1px solid var(--border);
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .workspace {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: var(--bg-base);
         }
 
-        .editor-container {
-            flex: 2;
-            display: flex;
-            gap: 2px;
+        .editor-box {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
             background: var(--border);
         }
 
-        .editor-pane {
-            flex: 1;
-            background: var(--bg-panel);
+        .pane {
+            background: var(--bg-base);
             display: flex;
             flex-direction: column;
         }
 
-        .pane-header {
-            padding: 10px 15px;
-            background: var(--bg-surface);
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .textarea-wrapper {
-            flex: 1;
-            position: relative;
-            display: flex;
-        }
-
-        .line-numbers {
-            width: 40px;
-            background: var(--bg-surface);
-            border-right: 1px solid var(--border);
-            padding: 15px 0;
-            text-align: right;
+        .pane-label {
+            padding: 8px 15px;
+            background: var(--bg-panel);
+            font-size: 11px;
             color: var(--text-muted);
-            font-family: var(--font-mono);
-            font-size: 13px;
-            line-height: 1.5;
-            user-select: none;
+            border-bottom: 1px solid var(--border);
         }
 
-        .code-area {
+        textarea {
             flex: 1;
             background: transparent;
-            color: var(--text-main);
+            color: #d1d1d1;
             border: none;
             padding: 15px;
             font-family: var(--font-mono);
             font-size: 13px;
-            line-height: 1.5;
             resize: none;
             outline: none;
-            white-space: pre;
-            overflow: auto;
+            line-height: 1.6;
         }
 
-        /* =========================================
-           TERMINAL / LOGS
-           ========================================= */
+        #output-code { color: var(--accent); }
+
+        /* Terminal Logs */
         .terminal {
-            flex: 1;
-            max-height: 250px;
+            height: 180px;
             background: #000;
             border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .terminal-header {
-            background: #111;
-            color: var(--text-muted);
-            padding: 5px 15px;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            border-bottom: 1px solid #333;
-        }
-
-        .terminal-body {
-            flex: 1;
             padding: 10px 15px;
             overflow-y: auto;
             font-family: var(--font-mono);
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        .log-entry { margin-bottom: 4px; }
-        .log-info { color: #3b82f6; }
-        .log-success { color: #10b981; }
-        .log-warn { color: #f59e0b; }
-        .log-error { color: #ef4444; }
-        .log-time { color: #52525b; margin-right: 8px; }
+        .log { margin-bottom: 4px; }
+        .log.info { color: #3b82f6; }
+        .log.success { color: #22c55e; }
+        .log.warn { color: #eab308; }
+        .log.error { color: #f43f5e; }
 
-        /* =========================================
-           CONTROLES & BOTONES
-           ========================================= */
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        input[type="checkbox"] {
-            accent-color: var(--primary);
-            width: 16px;
-            height: 16px;
-        }
-
+        /* Buttons */
         .btn {
             background: var(--bg-surface);
-            color: var(--text-main);
+            color: white;
             border: 1px solid var(--border);
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
+            transition: 0.2s;
         }
-
-        .btn:hover { background: var(--border); }
 
         .btn-primary {
             background: var(--primary);
-            border-color: var(--primary);
+            border: none;
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .btn-primary:hover {
-            background: #7c3aed;
-            box-shadow: 0 0 25px var(--primary-glow);
-        }
+        .btn-primary:hover { opacity: 0.8; transform: translateY(-1px); }
 
-        .btn-accent {
-            background: transparent;
-            border-color: var(--accent);
-            color: var(--accent);
-        }
+        .btn:active { transform: translateY(0); }
 
-        .btn-accent:hover {
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        /* Animaciones */
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        .processing { animation: pulse 1s infinite; }
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="navbar-brand">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary)"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-            <span>Delta</span>Deobfuscator V2
-        </div>
-        <div>
-            <span style="font-size: 12px; color: var(--text-muted);">Estado: </span>
-            <span style="color: var(--accent); font-weight: bold; font-size: 12px;">⚫ Online & Seguro</span>
-        </div>
-    </header>
+    <nav class="navbar">
+        <h1>Hercules Ultra-Cleaner <span style="color:white">V3</span></h1>
+        <div id="engine-status" style="font-size: 11px; color: var(--text-muted);">MOTOR: READY</div>
+    </nav>
 
-    <div class="main-container">
+    <div class="container">
         <aside class="sidebar">
-            <div class="control-group">
-                <h3 style="font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">Motores de Análisis</h3>
-                <label><input type="checkbox" id="opt-plain" checked> Extraer Texto Plano</label>
-                <label><input type="checkbox" id="opt-caesar" checked> Fuerza Bruta (Offset)</label>
-                <label><input type="checkbox" id="opt-dict" checked> Solver Diccionario (Avanzado)</label>
-                <label><input type="checkbox" id="opt-clean" checked> Limpiar Basura (Anti-Tamper)</label>
-            </div>
-
-            <div style="flex: 1;"></div>
-
-            <div class="control-group">
-                <button class="btn btn-primary" id="btn-run" onclick="executeDeobfuscator()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    Ejecutar Motor
-                </button>
-                <button class="btn" onclick="clearAll()">Limpiar Todo</button>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">CONFIGURACIÓN AVANZADA</p>
+            
+            <button class="btn btn-primary" onclick="mainEngine()">DESOFUSCAR AHORA</button>
+            <button class="btn" onclick="clearAll()">LIMPIAR PANELES</button>
+            
+            <div style="margin-top: 20px;">
+                <p style="font-size: 11px; color: var(--text-muted);">MÉTODOS ACTIVOS:</p>
+                <ul style="font-size: 12px; padding-left: 15px; margin-top: 8px; color: #aaa;">
+                    <li>Regex Pattern Matching</li>
+                    <li>Recursive Math Solver</li>
+                    <li>Cesar Brute-Force (30 levels)</li>
+                    <li>Anti-Obfuscation Strip</li>
+                </ul>
             </div>
         </aside>
 
         <main class="workspace">
-            <div class="editor-container">
-                <div class="editor-pane">
-                    <div class="pane-header">
-                        Input_Script.lua
-                        <span style="color: var(--text-muted); font-size: 11px;">(Pegar código aquí)</span>
-                    </div>
-                    <div class="textarea-wrapper">
-                        <div class="line-numbers" id="in-lines">1</div>
-                        <textarea class="code-area" id="input-code" spellcheck="false" oninput="updateLines('input-code', 'in-lines')"></textarea>
-                    </div>
+            <div class="editor-box">
+                <div class="pane">
+                    <div class="pane-label">CÓDIGO SUCIO (PEGAR AQUÍ)</div>
+                    <textarea id="input-code" placeholder="Pega el código de Hércules..."></textarea>
                 </div>
-
-                <div class="editor-pane">
-                    <div class="pane-header">
-                        Output_Clean.lua
-                        <button class="btn btn-accent" style="padding: 4px 10px; font-size: 11px;" onclick="copyOutput()">Copiar Código</button>
-                    </div>
-                    <div class="textarea-wrapper">
-                        <div class="line-numbers" id="out-lines">1</div>
-                        <textarea class="code-area" id="output-code" spellcheck="false" readonly oninput="updateLines('output-code', 'out-lines')"></textarea>
-                    </div>
+                <div class="pane">
+                    <div class="pane-label">CÓDIGO LIMPIO (RESULTADO)</div>
+                    <textarea id="output-code" readonly placeholder="Esperando análisis..."></textarea>
                 </div>
             </div>
 
-            <div class="terminal">
-                <div class="terminal-header">~ Delta Engine / Logs Internos</div>
-                <div class="terminal-body" id="console-log">
-                    </div>
+            <div class="terminal" id="logs">
+                <div class="log info">SISTEMA INICIALIZADO...</div>
             </div>
         </main>
     </div>
 
     <script>
-        // --- 1. Utilidades de la UI ---
-        function updateLines(textareaId, linesId) {
-            const textarea = document.getElementById(textareaId);
-            const lines = document.getElementById(linesId);
-            const lineCount = textarea.value.split('\n').length;
-            let linesHtml = '';
-            for (let i = 1; i <= lineCount; i++) {
-                linesHtml += i + '<br>';
-            }
-            lines.innerHTML = linesHtml;
-            // Sincronizar scroll
-            textarea.onscroll = function() {
-                lines.scrollTop = textarea.scrollTop;
-            };
-        }
-
-        function copyOutput() {
-            const out = document.getElementById('output-code');
-            if(!out.value) return Logger.warn("No hay nada que copiar.");
-            out.select();
-            document.execCommand('copy');
-            Logger.success("Código limpio copiado al portapapeles.");
+        const logBox = document.getElementById('logs');
+        
+        function logger(msg, type='info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
         }
 
         function clearAll() {
             document.getElementById('input-code').value = '';
             document.getElementById('output-code').value = '';
-            document.getElementById('console-log').innerHTML = '';
-            updateLines('input-code', 'in-lines');
-            updateLines('output-code', 'out-lines');
-            Logger.info("Entorno reiniciado.");
+            logBox.innerHTML = '<div class="log info">PANELES LIMPIOS.</div>';
         }
 
-        // --- 2. Sistema de Logs de Consola ---
-        const Logger = {
-            log: function(msg, type = "info") {
-                const term = document.getElementById('console-log');
-                const now = new Date();
-                const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-                
-                const div = document.createElement('div');
-                div.className = `log-entry log-${type}`;
-                div.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
-                term.appendChild(div);
-                term.scrollTop = term.scrollHeight;
-            },
-            info: msg => Logger.log(msg, "info"),
-            success: msg => Logger.log(msg, "success"),
-            warn: msg => Logger.log(msg, "warn"),
-            error: msg => Logger.log(msg, "error")
-        };
-
-        // Inicializar
-        updateLines('input-code', 'in-lines');
-        updateLines('output-code', 'out-lines');
-        Logger.info("Delta Deobfuscator Pro V2 inicializado.");
-        Logger.info("Esperando script ofuscado...");
-
-        // --- 3. Motor Principal de Análisis (AST Simulado) ---
-        async function executeDeobfuscator() {
+        function mainEngine() {
             const input = document.getElementById('input-code').value;
             const output = document.getElementById('output-code');
-            const btn = document.getElementById('btn-run');
             
-            if (!input.trim()) {
-                Logger.error("El editor de entrada está vacío.");
-                return;
-            }
+            if(!input.trim()) return logger("ERROR: No hay código para procesar", "error");
 
-            btn.classList.add('processing');
-            btn.innerHTML = 'Analizando...';
-            output.value = '';
-            document.getElementById('console-log').innerHTML = ''; // Limpiar logs
+            logger("INICIANDO MOTOR ULTRA V3...", "info");
             
-            Logger.info("Iniciando análisis heurístico...");
+            // 1. Limpiar el código de basura de control (Hercules utiliza mucho while false)
+            let cleanInput = input.replace(/while\s+false\s+do[\s\S]*?break[\s\S]*?end/g, "");
+            cleanInput = cleanInput.replace(/if\s+false\s+then[\s\S]*?end/g, "");
+            
+            logger("FASE 1: Basura lógica eliminada.");
 
-            const usePlain = document.getElementById('opt-plain').checked;
-            const useCaesar = document.getElementById('opt-caesar').checked;
-            const useDict = document.getElementById('opt-dict').checked;
-            
             let result = null;
 
-            // Simular un pequeño delay de procesamiento (para dar la sensación de trabajo pesado)
-            await new Promise(r => setTimeout(r, 600));
+            // 2. BUSCAR DICCIONARIO MATEMÁTICO (Caso más común en 1.6.2)
+            // Buscamos la tabla: variable = {[index] = "char"}
+            const tablePattern = /([a-zA-Z0-9_]+)\s*=\s*\{(\s*\[-?\d+\]\s*=\s*"[^"]+",?\s*)+\}/;
+            const tableMatch = cleanInput.match(tablePattern);
 
-            // FASE 1: Búsqueda en texto plano
-            if (usePlain && !result) {
-                Logger.info("Fase 1: Escaneando URIs en texto plano...");
-                const urlRegex = /(https?:\/\/(raw\.githubusercontent\.com|github\.com|pastebin\.com)[^\s"']+)/i;
-                const match = input.match(urlRegex);
-                if (match) {
-                    Logger.success(`URL detectada directamente: ${match[1].substring(0,30)}...`);
-                    result = `loadstring(game:HttpGet("${match[1]}"))()`;
-                } else {
-                    Logger.warn("Fase 1 Fallida: No hay enlaces expuestos.");
+            if(tableMatch) {
+                const tableName = tableMatch[1];
+                logger(`FASE 2: Tabla detectada: ${tableName}. Resolviendo...`, "success");
+                
+                // Extraer todos los valores de la tabla
+                const entries = {};
+                const entryPattern = /\[(-?\d+)\]\s*=\s*"([^"]+)"/g;
+                let entry;
+                while((entry = entryPattern.exec(tableMatch[0])) !== null) {
+                    entries[entry[1]] = entry[2];
+                }
+
+                // Buscar la cadena de concatenación: tableName[math] .. tableName[math]
+                const concatRegex = new RegExp(`${tableName}\\[([^\\]]+)\\]`, 'g');
+                let parts = [];
+                let m;
+                while((m = concatRegex.exec(cleanInput)) !== null) {
+                    try {
+                        // Resolver la matemática dentro del corchete
+                        let expression = m[1].replace(/[^0-9+\-*/()\-]/g, '');
+                        let solvedIndex = new Function(`return ${expression}`)();
+                        if(entries[solvedIndex]) {
+                            parts.push(entries[solvedIndex]);
+                        }
+                    } catch(e) {}
+                }
+
+                if(parts.length > 0) {
+                    result = parts.join("");
                 }
             }
 
-            // FASE 2: Solver del Diccionario Matemático (El código más avanzado de tu petición)
-            if (useDict && !result) {
-                Logger.info("Fase 2: Iniciando compilador de Diccionario Abstracto (AST)...");
-                result = attemptDictionarySolve(input);
-            }
-
-            // FASE 3: Fuerza Bruta (Cifrado César adaptativo)
-            if (useCaesar && !result) {
-                Logger.info("Fase 3: Iniciando ataque de fuerza bruta sobre offsets de strings...");
-                result = attemptBruteForce(input);
-            }
-
-            // Finalización
-            await new Promise(r => setTimeout(r, 400)); // Delay estético
-            btn.classList.remove('processing');
-            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Ejecutar Motor`;
-
-            if (result) {
-                Logger.success("¡Desofuscación completada con éxito!");
-                output.value = "-- [ Script Desofuscado por Delta Pro Engine ] --\n\n" + result;
-                updateLines('output-code', 'out-lines');
-            } else {
-                Logger.error("CRÍTICO: Ningún motor pudo extraer la carga útil.");
-                output.value = "-- Error: Ofuscación desconocida o no soportada.\n-- Revisa la consola para más detalles.";
-                updateLines('output-code', 'out-lines');
-            }
-        }
-
-        // --- 4. LÓGICA AVANZADA: Solucionador de Diccionarios Matemáticos ---
-        function attemptDictionarySolve(code) {
-            // 1. Encontrar la declaración del diccionario, ej: local azlSnOyuCK={[95]="_",[48]="0",...}
-            const dictRegex = /local\s+([a-zA-Z]+)\s*=\s*\{(\s*\[-?\d+\]\s*=\s*"[^"]+",?\s*)+\}/g;
-            let dictMatch = dictRegex.exec(code);
-            
-            if (!dictMatch) {
-                // Alternativa sin la palabra local en la misma línea
-                const dictRegexAlt = /([a-zA-Z]+)\s*=\s*\{(\s*\[-?\d+\]\s*=\s*"[^"]+",?\s*)+\}/;
-                dictMatch = dictRegexAlt.exec(code);
-            }
-
-            if (!dictMatch) {
-                Logger.warn("AST: No se detectó ninguna estructura de diccionario válida.");
-                return null;
-            }
-
-            const dictName = dictMatch[1];
-            Logger.info(`AST: Diccionario mapeado bajo la variable '${dictName}'. Extrayendo pares...`);
-
-            // 2. Construir un mapa real en Javascript del diccionario de Lua
-            const mapRegex = /\[(-?\d+)\]\s*=\s*"([^"]+)"/g;
-            const dictMap = {};
-            let m;
-            let itemsCount = 0;
-            while ((m = mapRegex.exec(dictMatch[0])) !== null) {
-                dictMap[parseInt(m[1])] = m[2];
-                itemsCount++;
-            }
-            Logger.info(`AST: Tabla virtual construida con ${itemsCount} entradas.`);
-
-            // 3. Buscar la ejecución que concatena el diccionario
-            // Busca cosas como: dictName[-224+328]..dictName[10]..
-            // Escapamos el nombre de la variable para usarlo en la regex
-            const escapedName = dictName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const concatRegex = new RegExp(`(${escapedName}\\[[^\\]]+\\](?:\\.\\.${escapedName}\\[[^\\]]+\\])+)`, 'g');
-            
-            const payloadMatch = concatRegex.exec(code);
-            
-            if (!payloadMatch) {
-                Logger.warn("AST: Se encontró la tabla, pero no el bloque de concatenación matemático.");
-                return null;
-            }
-
-            Logger.info("AST: Bloque matemático detectado. Resolviendo ecuaciones en tiempo real...");
-            
-            // 4. Evaluar las matemáticas
-            const mathBlocks = payloadMatch[1].split('..');
-            let decodedString = "";
-
-            try {
-                for (let block of mathBlocks) {
-                    // Extraer lo que está entre corchetes: dictName[-224+328] -> -224+328
-                    const mathExprMatch = /\[(.*?)\]/.exec(block);
-                    if (mathExprMatch) {
-                        let expr = mathExprMatch[1];
-                        // Solo permitimos matemáticas básicas por seguridad usando Function
-                        // Reemplazamos paréntesis si es necesario (el código ofuscado a veces usa dict[(10-5)])
-                        let safeExpr = expr.replace(/[^0-9+\-*/()\-]/g, '');
-                        let resultNum = new Function(`return ${safeExpr}`)();
-                        
-                        if (dictMap[resultNum] !== undefined) {
-                            decodedString += dictMap[resultNum];
-                        } else {
-                            Logger.warn(`AST: El índice ${resultNum} no existe en el diccionario. Letra saltada.`);
+            // 3. BUSCAR POR FUERZA BRUTA (Caso de Strings cifrados)
+            if(!result || !result.includes("http")) {
+                logger("FASE 3: Buscando strings cifrados con Offset...", "info");
+                const stringPattern = /["']([a-zA-Z0-9\/\:\.\-%_]{30,})["']/g;
+                let sMatch;
+                while((sMatch = stringPattern.exec(cleanInput)) !== null) {
+                    let candidate = sMatch[1];
+                    // Probar offsets de 1 a 30
+                    for(let i=1; i<=30; i++) {
+                        let decoded = attemptCesar(candidate, i);
+                        if(decoded.includes("https://")) {
+                            result = decoded;
+                            logger(`EXITO: Offset ${i} detectado.`, "success");
+                            break;
                         }
-                          font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-copy {
-            background-color: #2d3436;
-        }
-
-        .btn-copy:hover {
-            background-color: #636e72;
-        }
-
-        #status {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
-            grid-column: 1 / -1;
-        }
-
-        .success { color: var(--success); }
-        .error { color: var(--error); }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h1>Hercules Cleaner</h1>
-        <p>Extractor de Loadstrings para Delta y otros ejecutores</p>
-    </div>
-
-    <div class="container">
-        <div class="panel">
-            <h2>Código Ofuscado</h2>
-            <textarea id="inputCode" placeholder="Pega el código de Hercules aquí..."></textarea>
-        </div>
-
-        <div class="panel">
-            <h2>
-                Código Limpio
-                <button class="btn-copy" onclick="copyToClipboard()">Copiar</button>
-            </h2>
-            <textarea id="outputCode" readonly placeholder="El loadstring limpio aparecerá aquí..."></textarea>
-        </div>
-
-        <div class="controls">
-            <button onclick="deobfuscate()">Desofuscar Código</button>
-        </div>
-
-        <div id="status"></div>
-    </div>
-
-    <script>
-        function setStatus(msg, type) {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = msg;
-            statusEl.className = type;
-        }
-
-        function copyToClipboard() {
-            const output = document.getElementById('outputCode');
-            if (!output.value) return;
-            output.select();
-            document.execCommand('copy');
-            setStatus('¡Código copiado al portapapeles!', 'success');
-        }
-
-        function deobfuscate() {
-            const input = document.getElementById('inputCode').value;
-            const outputEl = document.getElementById('outputCode');
-            outputEl.value = '';
-            setStatus('Analizando código...', '');
-
-            if (!input.trim()) {
-                setStatus('Por favor, pega un código primero.', 'error');
-                return;
-            }
-
-            // 1. Buscar si la URL está en texto plano (Plaintext)
-            const urlRegex = /(https?:\/\/(raw\.githubusercontent\.com|pastebin\.com|github\.com)[^\s"']+)/i;
-            const plainMatch = input.match(urlRegex);
-            
-            if (plainMatch) {
-                outputEl.value = `-- URL encontrada en texto plano\nloadstring(game:HttpGet("${plainMatch[1]}"))()`;
-                setStatus('¡Éxito! URL extraída directamente.', 'success');
-                return;
-            }
-
-            // 2. Extraer textos largos y aplicar fuerza bruta para el Cifrado César (Hercules offset)
-            const stringRegex = /"([^"]+)"|'([^']+)'/g;
-            let strings = [];
-            let m;
-            while ((m = stringRegex.exec(input)) !== null) {
-                let str = m[1] || m[2];
-                if (str.length > 20) strings.push(str);
-            }
-
-            // Probamos desplazamientos (offsets) del 1 al 30
-            for (let s of strings) {
-                for (let shift = 1; shift <= 30; shift++) {
-                    let decodedForward = "";
-                    let decodedBackward = "";
-                    
-                    // Hercules a veces suma y a veces resta el offset, probamos ambos
-                    for (let i = 0; i < s.length; i++) {
-                        let code = s.charCodeAt(i);
-                        
-                        // Hacia adelante
-                        if (code >= 48 && code <= 57) {
-                            decodedForward += String.fromCharCode(((code - 48 + shift) % 10) + 48);
-                        } else if (code >= 65 && code <= 90) {
-                            decodedForward += String.fromCharCode(((code - 65 + shift) % 26) + 65);
-                        } else if (code >= 97 && code <= 122) {
-                            decodedForward += String.fromCharCode(((code - 97 + shift) % 26) + 97);
-                        } else {
-                            decodedForward += s.charAt(i);
-                        }
-
-                        // Hacia atrás
-                        if (code >= 48 && code <= 57) {
-                            decodedBackward += String.fromCharCode(((code - 48 - shift + 10) % 10) + 48);
-                        } else if (code >= 65 && code <= 90) {
-                            decodedBackward += String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
-                        } else if (code >= 97 && code <= 122) {
-                            decodedBackward += String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
-                        } else {
-                            decodedBackward += s.charAt(i);
-                        }
-                    }
-
-                    if (decodedForward.includes("https://") || decodedForward.includes("github")) {
-                        outputEl.value = `-- URL descifrada (Offset +${shift})\nloadstring(game:HttpGet("${decodedForward}"))()`;
-                        setStatus(`¡Éxito! URL descifrada con desplazamiento de ${shift}.`, 'success');
-                        return;
-                    }
-                    if (decodedBackward.includes("https://") || decodedBackward.includes("github")) {
-                        outputEl.value = `-- URL descifrada (Offset -${shift})\nloadstring(game:HttpGet("${decodedBackward}"))()`;
-                        setStatus(`¡Éxito! URL descifrada con desplazamiento inverso de ${shift}.`, 'success');
-                        return;
                     }
                 }
             }
 
-            // 3. Si no encuentra nada, es posible que sea el método de Diccionario Matemático
-            if (input.includes("table.concat") && input.includes("math.")) {
-                outputEl.value = "-- Error de extracción automática.\n-- El script parece usar el método de 'Diccionario Matemático' (Ej: azlSnOyuCK[-224+328]).\n-- Este método requiere ejecución manual de matemáticas para resolver.";
-                setStatus('No se pudo extraer automáticamente. Ofuscación avanzada detectada.', 'error');
+            // 4. VERIFICAR RESULTADO
+            if(result && (result.includes("http"))) {
+                // Si el resultado no tiene el loadstring, se lo ponemos
+                if(!result.includes("loadstring")) {
+                    result = `loadstring(game:HttpGet("${result}"))()`;
+                }
+                output.value = result;
+                logger("PROCESO COMPLETADO.", "success");
             } else {
-                outputEl.value = "-- No se encontró ninguna URL válida.";
-                setStatus('Error: No se encontró ningún patrón de Hercules reconocible.', 'error');
+                logger("ERROR: No se pudo encontrar el enlace. El código podría estar usando una protección nueva.", "error");
+                output.value = "-- No se pudo desofuscar automáticamente.\n-- Verifica si pegaste el código completo.";
             }
+        }
+
+        function attemptCesar(str, shift) {
+            return str.replace(/[a-zA-Z0-9]/g, (c) => {
+                let code = c.charCodeAt(0);
+                // Números
+                if (code >= 48 && code <= 57) return String.fromCharCode(((code - 48 - shift + 100) % 10) + 48);
+                // Mayúsculas
+                if (code >= 65 && code <= 90) return String.fromCharCode(((code - 65 - shift + 260) % 26) + 65);
+                // Minúsculas
+                if (code >= 97 && code <= 122) return String.fromCharCode(((code - 97 - shift + 260) % 26) + 97);
+                return c;
+            });
         }
     </script>
 </body>
