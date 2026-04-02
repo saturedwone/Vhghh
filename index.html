@@ -3,114 +3,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hercules Universal Cleaner</title>
+    <title>Delta Pro Deobfuscator | Advanced Engine</title>
     <style>
+        /* =========================================
+           VARIABLES & RESET
+           ========================================= */
         :root {
-            --bg-color: #0f0f13;
-            --panel-bg: #1a1a24;
-            --primary: #6c5ce7;
-            --primary-hover: #5a4bcf;
-            --text-main: #e2e2e2;
-            --text-muted: #8b8b99;
-            --border: #2d2d3d;
-            --success: #00b894;
-            --error: #d63031;
+            --bg-base: #09090b;
+            --bg-panel: #18181b;
+            --bg-surface: #27272a;
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --secondary: #3b82f6;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border: #3f3f46;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --font-sans: 'Inter', system-ui, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-base);
             color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Barra de desplazamiento personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* =========================================
+           LAYOUT PRINCIPAL
+           ========================================= */
+        .navbar {
+            height: 60px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
             align-items: center;
-            min-height: 100vh;
-            padding: 2rem;
+            padding: 0 20px;
+            justify-content: space-between;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        .header h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .navbar-brand span { color: var(--primary); }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
         }
 
-        .header p {
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .panel {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+        .sidebar {
+            width: 250px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
             padding: 20px;
             display: flex;
             flex-direction: column;
+            gap: 20px;
         }
 
-        .panel h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: var(--text-main);
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-base);
+        }
+
+        .editor-container {
+            flex: 2;
+            display: flex;
+            gap: 2px;
+            background: var(--border);
+        }
+
+        .editor-pane {
+            flex: 1;
+            background: var(--bg-panel);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pane-header {
+            padding: 10px 15px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        textarea {
-            width: 100%;
-            height: 400px;
-            background-color: #000000;
-            color: #00ff00;
-            border: 1px solid var(--border);
-            border-radius: 4px;
+        .textarea-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+        }
+
+        .line-numbers {
+            width: 40px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            padding: 15px 0;
+            text-align: right;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
+            user-select: none;
+        }
+
+        .code-area {
+            flex: 1;
+            background: transparent;
+            color: var(--text-main);
+            border: none;
             padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.5;
             resize: none;
             outline: none;
+            white-space: pre;
+            overflow: auto;
         }
 
-        textarea::placeholder {
-            color: #4a4a4a;
+        /* =========================================
+           TERMINAL / LOGS
+           ========================================= */
+        .terminal {
+            flex: 1;
+            max-height: 250px;
+            background: #000;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
         }
 
-        .controls {
+        .terminal-header {
+            background: #111;
+            color: var(--text-muted);
+            padding: 5px 15px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 10px 15px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .log-entry { margin-bottom: 4px; }
+        .log-info { color: #3b82f6; }
+        .log-success { color: #10b981; }
+        .log-warn { color: #f59e0b; }
+        .log-error { color: #ef4444; }
+        .log-time { color: #52525b; margin-right: 8px; }
+
+        /* =========================================
+           CONTROLES & BOTONES
+           ========================================= */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            grid-column: 1 / -1;
+            align-items: center;
+            gap: 8px;
         }
 
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: bold;
+        .btn:hover { background: var(--border); }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        .btn-accent {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        /* Animaciones */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .processing { animation: pulse 1s infinite; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary)"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span>Delta</span>Deobfuscator V2
+        </div>
+        <div>
+            <span style="font-size: 12px; color: var(--text-muted);">Estado: </span>
+            <span style="color: var(--accent); font-weight: bold; font-size: 12px;">⚫ Online & Seguro</span>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="control-group">
+                <h3 style="font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">Motores de Análisis</h3>
+                <label><input type="checkbox" id="opt-plain" checked> Extraer Texto Plano</label>
+                <label><input type="checkbox" id="opt-caesar" checked> Fuerza Bruta (Offset)</label>
+                <label><input type="checkbox" id="opt-dict" checked> Solver Diccionario (Avanzado)</label>
+                <label><input type="checkbox" id="opt-clean" checked> Limpiar Basura (Anti-Tamper)</label>
+            </div>
+
+            <div style="flex: 1;"></div>
+
+            <div class="control-group">
+                <button class="btn btn-primary" id="btn-run" onclick="executeDeobfuscator()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Ejecutar Motor
+                </button>
+                <button class="btn" onclick="clearAll()">Limpiar Todo</button>
+            </div>
+        </aside>
+
+        <main class="workspace">
+            <div class="editor-container">
+                <div class="editor-pane">
+                    <div class="pane-header">
+                        Input_Script.lua
+                        <span style="color: var(--text-muted); font-size: 11px;">(Pegar código aquí)</span>
+                    </div>
+                    <div class="textarea-wrapper">
+                        <div class="line-numbers" id="in-lines">1</div>
+                        <textarea class="code-area" id="input-code" spellcheck="false" oninput="updateLines('input-code', 'in-lines')"></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-pane">
+                    <div class="pane-header">
+                        Output_Clean.lua
+                        <button class="btn btn-accent" style="padding: 4px 10px; font-size: 11px;" onclick="copyOutput()">Copiar Código</button>
+                    </div>
+                    <div class="textarea-wrapper">
+                        <div class="line-numbers" id="out-lines">1</div>
+                        <textarea class="code-area" id="output-code" spellcheck="false" readonly oninput="updateLines('output-code', 'out-lines')"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terminal">
+                <div class="terminal-header">~ Delta Engine / Logs Internos</div>
+                <div class="terminal-body" id="console-log">
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 1. Utilidades de la UI ---
+        function updateLines(textareaId, linesId) {
+            const textarea = document.getElementById(textareaId);
+            const lines = document.getElementById(linesId);
+            const lineCount = textarea.value.split('\n').length;
+            let linesHtml = '';
+            for (let i = 1; i <= lineCount; i++) {
+                linesHtml += i + '<br>';
+            }
+            lines.innerHTML = linesHtml;
+            // Sincronizar scroll
+            textarea.onscroll = function() {
+                lines.scrollTop = textarea.scrollTop;
+            };
+        }
+
+        function copyOutput() {
+            const out = document.getElementById('output-code');
+            if(!out.value) return Logger.warn("No hay nada que copiar.");
+            out.select();
+            document.execCommand('copy');
+            Logger.success("Código limpio copiado al portapapeles.");
+        }
+
+        function clearAll() {
+            document.getElementById('input-code').value = '';
+            document.getElementById('output-code').value = '';
+            document.getElementById('console-log').innerHTML = '';
+            updateLines('input-code', 'in-lines');
+            updateLines('output-code', 'out-lines');
+            Logger.info("Entorno reiniciado.");
+        }
+
+        // --- 2. Sistema de Logs de Consola ---
+        const Logger = {
+            log: function(msg, type = "info") {
+                const term = document.getElementById('console-log');
+                const now = new Date();
+                const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+                
+                const div = document.createElement('div');
+                div.className = `log-entry log-${type}`;
+                div.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
+                term.appendChild(div);
+                term.scrollTop = term.scrollHeight;
+            },
+            info: msg => Logger.log(msg, "info"),
+            success: msg => Logger.log(msg, "success"),
+            warn: msg => Logger.log(msg, "warn"),
+            error: msg => Logger.log(msg, "error")
+        };
+
+        // Inicializar
+        updateLines('input-code', 'in-lines');
+        updateLines('output-code', 'out-lines');
+        Logger.info("Delta Deobfuscator Pro V2 inicializado.");
+        Logger.info("Esperando script ofuscado...");
+
+        // --- 3. Motor Principal de Análisis (AST Simulado) ---
+        async function executeDeobfuscator() {
+            const input = document.getElementById('input-code').value;
+            const output = document.getElementById('output-code');
+            const btn = document.getElementById('btn-run');
+            
+            if (!input.trim()) {
+                Logger.error("El editor de entrada está vacío.");
+                return;
+            }
+
+            btn.classList.add('processing');
+            btn.innerHTML = 'Analizando...';
+            output.value = '';
+            document.getElementById('console-log').innerHTML = ''; // Limpiar logs
+            
+            Logger.info("Iniciando análisis heurístico...");
+
+            const usePlain = document.getElementById('opt-plain').checked;
+            const useCaesar = document.getElementById('opt-caesar').checked;
+            const useDict = document.getElementById('opt-dict').checked;
+            
+            let result = null;
+
+            // Simular un pequeño delay de procesamiento (para dar la sensación de trabajo pesado)
+            await new Promise(r => setTimeout(r, 600));
+
+            // FASE 1: Búsqueda en texto plano
+            if (usePlain && !result) {
+                Logger.info("Fase 1: Escaneando URIs en texto plano...");
+                const urlRegex = /(https?:\/\/(raw\.githubusercontent\.com|github\.com|pastebin\.com)[^\s"']+)/i;
+                const match = input.match(urlRegex);
+                if (match) {
+                    Logger.success(`URL detectada directamente: ${match[1].substring(0,30)}...`);
+                    result = `loadstring(game:HttpGet("${match[1]}"))()`;
+                } else {
+                    Logger.warn("Fase 1 Fallida: No hay enlaces expuestos.");
+                }
+            }
+
+            // FASE 2: Solver del Diccionario Matemático (El código más avanzado de tu petición)
+            if (useDict && !result) {
+                Logger.info("Fase 2: Iniciando compilador de Diccionario Abstracto (AST)...");
+                result = attemptDictionarySolve(input);
+            }
+
+            // FASE 3: Fuerza Bruta (Cifrado César adaptativo)
+            if (useCaesar && !result) {
+                Logger.info("Fase 3: Iniciando ataque de fuerza bruta sobre offsets de strings...");
+                result = attemptBruteForce(input);
+            }
+
+            // Finalización
+            await new Promise(r => setTimeout(r, 400)); // Delay estético
+            btn.classList.remove('processing');
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Ejecutar Motor`;
+
+            if (result) {
+                Logger.success("¡Desofuscación completada con éxito!");
+                output.value = "-- [ Script Desofuscado por Delta Pro Engine ] --\n\n" + result;
+                updateLines('output-code', 'out-lines');
+            } else {
+                Logger.error("CRÍTICO: Ningún motor pudo extraer la carga útil.");
+                output.value = "-- Error: Ofuscación desconocida o no soportada.\n-- Revisa la consola para más detalles.";
+                updateLines('output-code', 'out-lines');
+            }
+        }
+
+        // --- 4. LÓGICA AVANZADA: Solucionador de Diccionarios Matemáticos ---
+        function attemptDictionarySolve(code) {
+            // 1. Encontrar la declaración del diccionario, ej: local azlSnOyuCK={[95]="_",[48]="0",...}
+            const dictRegex = /local\s+([a-zA-Z]+)\s*=\s*\{(\s*\[-?\d+\]\s*=\s*"[^"]+",?\s*)+\}/g;
+            let dictMatch = dictRegex.exec(code);
+            
+            if (!dictMatch) {
+                // Alternativa sin la palabra local en la misma línea
+                const dictRegexAlt = /([a-zA-Z]+)\s*=\s*\{(\s*\[-?\d+\]\s*=\s*"[^"]+",?\s*)+\}/;
+                dictMatch = dictRegexAlt.exec(code);
+            }
+
+            if (!dictMatch) {
+                Logger.warn("AST: No se detectó ninguna estructura de diccionario válida.");
+                return null;
+            }
+
+            const dictName = dictMatch[1];
+            Logger.info(`AST: Diccionario mapeado bajo la variable '${dictName}'. Extrayendo pares...`);
+
+            // 2. Construir un mapa real en Javascript del diccionario de Lua
+            const mapRegex = /\[(-?\d+)\]\s*=\s*"([^"]+)"/g;
+            const dictMap = {};
+            let m;
+            let itemsCount = 0;
+            while ((m = mapRegex.exec(dictMatch[0])) !== null) {
+                dictMap[parseInt(m[1])] = m[2];
+                itemsCount++;
+            }
+            Logger.info(`AST: Tabla virtual construida con ${itemsCount} entradas.`);
+
+            // 3. Buscar la ejecución que concatena el diccionario
+            // Busca cosas como: dictName[-224+328]..dictName[10]..
+            // Escapamos el nombre de la variable para usarlo en la regex
+            const escapedName = dictName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const concatRegex = new RegExp(`(${escapedName}\\[[^\\]]+\\](?:\\.\\.${escapedName}\\[[^\\]]+\\])+)`, 'g');
+            
+            const payloadMatch = concatRegex.exec(code);
+            
+            if (!payloadMatch) {
+                Logger.warn("AST: Se encontró la tabla, pero no el bloque de concatenación matemático.");
+                return null;
+            }
+
+            Logger.info("AST: Bloque matemático detectado. Resolviendo ecuaciones en tiempo real...");
+            
+            // 4. Evaluar las matemáticas
+            const mathBlocks = payloadMatch[1].split('..');
+            let decodedString = "";
+
+            try {
+                for (let block of mathBlocks) {
+                    // Extraer lo que está entre corchetes: dictName[-224+328] -> -224+328
+                    const mathExprMatch = /\[(.*?)\]/.exec(block);
+                    if (mathExprMatch) {
+                        let expr = mathExprMatch[1];
+                        // Solo permitimos matemáticas básicas por seguridad usando Function
+                        // Reemplazamos paréntesis si es necesario (el código ofuscado a veces usa dict[(10-5)])
+                        let safeExpr = expr.replace(/[^0-9+\-*/()\-]/g, '');
+                        let resultNum = new Function(`return ${safeExpr}`)();
+                        
+                        if (dictMap[resultNum] !== undefined) {
+                            decodedString += dictMap[resultNum];
+                        } else {
+                            Logger.warn(`AST: El índice ${resultNum} no existe en el diccionario. Letra saltada.`);
+                        }
+                          font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
